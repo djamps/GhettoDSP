@@ -15,22 +15,22 @@
 #define LCD2002   false  // 20x2 LCD
 #define BT        true   // BT module
 #define ENCODER   true   // Encoder
-#define PWR       true   // Separate PWR board
-#define GHETTODSP true   // HooptyDSP board (external PWR)
-#define HOOPTYDSP false  // HooptyDSP board (integrated PWR)
+#define PWR       true   // Separate PWR board (GhettoDSP only)
+#define GHETTODSP true   // This is a GhettoDSP board
+#define HOOPTYDSP false  // This is a HooptyDSP board
 
 // Software settings
-#define TWOWAY    true   // GhettoDSP - 2-way x-over instead of 3-way
-#define LOWCUT    true   // Include low-cut option in dBass menu
+#define TWOWAY    true   // 2-way x-over instead of 3-way (GhettoDSP only)
+#define LOWCUT    true   // Include low-cut option in dBass menu (GhettoDSP only)
 #define CUSTOM    false  // Use custom settings array
 #define VUMETER   false  // Show stereo VU meter on home screen
 #define VUREVERSE false  // Reverse VU meter movement
 #define VUSLOW    false  // Slow down VU dropoff
 #define VUPEAK    false  // Peak indication
-#define LINEINDSP false  // Line input via DSP
-#define LINEINBT  true   // Line in via BM64
+#define LINEINDSP false  // Aux in via DSP
+#define LINEINBT  true   // Aux in via BM64 (required for concert mode to work with aux in)
 
-// This section defines which settings included in LCD menu and which order
+// This section defines which settings are included in the LCD menu and the order
 
 // Settings options:
 // 1: dBass Mode
@@ -40,7 +40,7 @@
 // 5: Mid Level (3-way) // Ghetto only
 // 6: High Level (3-way) // Ghetto only
 // 7: System Gain
-// 8: nSpk Mode
+// 8: nSpk Mode (concert mode)
 // 9: Aux in mode
 // 10: Channel mode // Ghetto only
 // 11: Fader // Hoopty only
