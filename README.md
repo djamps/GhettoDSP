@@ -11,5 +11,7 @@ There are currently four boards:
 
 This Arduino code is for GhettoDSP and HooptyDSP boards.
 
-Work in progress.  
+Work in progress.
+
+[EasyEDA project page for GhettoDSP board](https://oshwlab.com/k6rp/mega328p-adau1701_copy_copy_copy_copy_copy_copy_copy_copy_copy)
 
