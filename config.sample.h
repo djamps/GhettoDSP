@@ -8,26 +8,26 @@
 #define SPEAKER_NAME "GhettoKlipsch" // Bluetooth name (20 char max)
 //                   "--------------------"
 
-#define DSP_VERSION 29 // Must be increased each time DSP program changed
+#define DSP_VERSION 29  // Must be increased each time DSP program changed
 
 // Hardware settings
 #define LCD2004   true  // 20x4 LCD
 #define LCD2002   false // 20x2 LCD
 #define BT        true  // BT module
 #define ENCODER   true  // Encoder
-#define PWR       true // Separate PWR board
-#define GHETTODSP true // HooptyDSP board (external PWR)
-#define HOOPTYDSP false  // HooptyDSP board (integrated PWR)
+#define PWR       true  // Separate PWR board
+#define GHETTODSP true  // This is a GhettoDSP board (boombox)
+#define HOOPTYDSP false // This is a HooptyDSP board (car stereo)
 
 // Software settings
 #define LOWCUT    false // Include low-cut option in dBass menu
 #define CUSTOM    false // Use custom settings array
-#define VUMETER   false  // Show stereo VU meter on home screen
+#define VUMETER   false // Show stereo VU meter on home screen
 #define VUREVERSE true  // Reverse VU meter movement
 #define VUSLOW    true  // Slow down VU dropoff
 #define VUPEAK    false // Peak indication
-#define LINEINDSP false  // Line input via DSP
-#define LINEINBT  true // Line in via BM64
+#define LINEINDSP false // Line input via DSP
+#define LINEINBT  true  // Line in via BM64
 
 // This section defines which settings included in LCD menu and which order
 
