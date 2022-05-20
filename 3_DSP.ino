@@ -131,7 +131,9 @@ void setDspParams() {
 #if GHETTODSP
   dBassModeSet();
   dsp.volume(MOD_LOWLEVEL_GAIN1940ALGNS1_ADDR, settings.lowLevel);
-  dsp.volume(MOD_MIDLEVEL_GAIN1940ALGNS2_ADDR, settings.midLevel);
+  #if !TWOWAY
+    dsp.volume(MOD_MIDLEVEL_GAIN1940ALGNS2_ADDR, settings.midLevel);
+  #endif
   dsp.volume(MOD_HIGHLEVEL_GAIN1940ALGNS3_ADDR, settings.highLevel);
 #endif
 
