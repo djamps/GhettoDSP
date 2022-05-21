@@ -15,7 +15,7 @@ There are currently four boards (hyperlink to EasyEDA project):
 * [GhettoDSP](https://oshwlab.com/k6rp/mega328p-adau1701_copy_copy_copy_copy_copy_copy_copy_copy_copy) - DSP and BT board
 * [GhettoDAC](https://oshwlab.com/k6rp/ghettodac-0-1) - Dual PCM1502A daughter card for GhettoDSP provides 4 more channels @ 2V RMS (total 8-ch)
 * [GhettoPWR](https://github.com/djamps/GhettoPWR) - Power supply (up to 400 watts boost and buck converters), and BMS for lithium batteries (4-8 cells)
-* HooptyDSP - 12 volt version of GhettoDSP with integrated power supply for in-dash mobile/car audio
+* [HooptyDSP](https://oshwlab.com/k6rp/mega328p-adau1701_copy_copy_copy_copy_copy_copy_copy_copy) - 12 volt version of GhettoDSP with integrated power supply for in-dash mobile/car audio
 
 This Arduino code is provided for GhettoDSP and HooptyDSP boards (specify which in config.h)
 
