@@ -10,10 +10,10 @@ Optional 20x2 or 20x4 I2C LCD module and rotary encoder for DSP and BT settings.
 
 Optional power supply module (GhettoPWR) for buck/boost and battery charge/BMS function.
 
-There are currently four boards:
+There are currently four boards (hyperlink to EasyEDA project):
 
-* GhettoDSP - DSP and BT board
-* GhettoDAC - Dual PCM1502A daughter card for GhettoDSP provides 4 more channels @ 2V RMS (total 8-ch)
+* [GhettoDSP](https://oshwlab.com/k6rp/mega328p-adau1701_copy_copy_copy_copy_copy_copy_copy_copy_copy) - DSP and BT board
+* [GhettoDAC](https://oshwlab.com/k6rp/ghettodac-0-1) - Dual PCM1502A daughter card for GhettoDSP provides 4 more channels @ 2V RMS (total 8-ch)
 * [GhettoPWR](https://github.com/djamps/GhettoPWR) - Power supply (up to 400 watts boost and buck converters), and BMS for lithium batteries (4-8 cells)
 * HooptyDSP - 12 volt version of GhettoDSP with integrated power supply for in-dash mobile/car audio
 
@@ -26,6 +26,3 @@ Spare ADC's for both DSP and MCU are exposed.
 Documentation is a work in progress.
 
 Special thanks to [MCUDude](https://github.com/MCUdude/SigmaDSP) and [konikoni428](https://github.com/konikoni428/BM64_arduino) for helping make this possible.
-
-[EasyEDA project page for GhettoDSP board](https://oshwlab.com/k6rp/mega328p-adau1701_copy_copy_copy_copy_copy_copy_copy_copy_copy)
-
