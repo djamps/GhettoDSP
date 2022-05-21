@@ -1,0 +1,13 @@
+1. Compile the project by clicking the Link Compile Download button
+
+2. Delete contents of SigmaDSP/export then Export files into SigmaDSP/export
+
+3. In the Hardware Configuration tab, right click on the SigmaDSP (called IC_1) and select the option "Write Latest Compilation to EEPROM."
+
+4. move the subfolder SigmaDSP/ghetto2_IC_2 into export.
+
+5. run DSP_parameter_generator.ps1 script by right click -> Run with PowerShell.
+
+6. Increase the variable DSP_VERSION by one
+
+7. Upload sketch

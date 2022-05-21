@@ -23,6 +23,8 @@ Base DSP config is created using SigmaDSP, and is programmed directly by the MCU
 
 Spare ADC's for both DSP and MCU are exposed.
 
+![Screenshot](Docs/diagram.png)
+
 Documentation is a work in progress.
 
 Special thanks to [MCUDude](https://github.com/MCUdude/SigmaDSP) and [konikoni428](https://github.com/konikoni428/BM64_arduino) for helping make this possible.
