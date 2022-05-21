@@ -14,7 +14,7 @@ There are currently four boards:
 
 * GhettoDSP - DSP and BT board
 * GhettoDAC - Dual PCM1502A daughter card for GhettoDSP provides 4 more channels @ 2V RMS (total 8-ch)
-* GhettoPWR - Power supply (up to 400 watts boost and buck converters), and BMS for lithium batteries (4-8 cells)
+* [GhettoPWR](https://github.com/djamps/GhettoPWR) - Power supply (up to 400 watts boost and buck converters), and BMS for lithium batteries (4-8 cells)
 * HooptyDSP - 12 volt version of GhettoDSP with integrated power supply for in-dash mobile/car audio
 
 This Arduino code is provided for GhettoDSP and HooptyDSP boards (specify which in config.h)
