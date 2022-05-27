@@ -475,7 +475,7 @@ void showSettings() {
 }
 
 void lcdPrintSpkStatus() {
-  #if !VUMETER
+  //#if !VUMETER
   if ( settings.spkMode > 0 ) {
     char buffer[21];
     char buff[11];
@@ -500,7 +500,7 @@ void lcdPrintSpkStatus() {
     lcdPrintCentered(F(" "));
 #endif
   }
-  #endif
+  //#endif
 }
 
 const char * lcdGetSpkMode(char * buf) {

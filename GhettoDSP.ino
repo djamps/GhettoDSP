@@ -337,13 +337,17 @@ void loop() {
       #if VUMETER
         if ( settingMode == 0 ) {
           #if LCD2002
-            if ( devicePlaying1 || devicePlaying2 ) {
+            if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
               lcdPrintStereoVu(0); // show on line 0
             } else if ( deviceConnected1 || deviceConnected2 ) {
               showStatePower(0);
             }
           #elif LCD2004
-            lcdPrintStereoVu(1); // show on line 1
+            if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
+              lcdPrintStereoVu(1); // show on line 1
+            } else if ( statePower == 1 ) {
+              showSettings();
+            }
           #endif
         }
       #endif

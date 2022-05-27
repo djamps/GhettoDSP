@@ -4,17 +4,17 @@ bool audioDetected = 0; // DSP audio output detect // default to on during start
 void dBassModeSet() {
   switch ( settings.dBassMode ) {
     case 0:
-      dsp.dcSource(MOD_DBASS_MONOSWSLEW_ADDR, uint32_t(0));
-      //dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, 0);
+      dsp.dcSource(MOD_DBASS_MONOSWSLEW_ADDR, uint32_t(0)); // Disable dBass
+      dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, 0); // Restore sub bass
       break;
     case 1:
-      dsp.dcSource(MOD_DBASS_MONOSWSLEW_ADDR, uint32_t(1));
-      //dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, 0);
+      dsp.dcSource(MOD_DBASS_MONOSWSLEW_ADDR, uint32_t(1)); // Enable dBass
+      dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, 0); // Restore sub bass
       break;
     case 2:
 #if LOWCUT
-      dsp.dcSource(MOD_DBASS_MONOSWSLEW_ADDR, uint32_t(0));
-      dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, -30);
+      dsp.dcSource(MOD_DBASS_MONOSWSLEW_ADDR, uint32_t(0)); // Disable dBass
+      dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, -60); // Cut sub bass
 #endif
       break;
   }
@@ -149,16 +149,18 @@ void stopAudio() {
   // Mute external DAC
   digitalWrite(SOFT_MUTE, LOW);
   delay(100);
+  
   // Stop the DSP
   digitalWrite(DSP_RESET, LOW);
+  
   // Shutdown the BM64
-#if BT
-  if ( settings.spkMode > 0 ) {
-    bm64.mmiAction(BM64_MMI_TERMINATE_CANCEL_MSPK_CONNECTION);
-  }
-  delay(100);
-  bm64.powerOff();
-#endif
+  #if BT
+    if ( settings.spkMode > 0 ) {
+      bm64.mmiAction(BM64_MMI_TERMINATE_CANCEL_MSPK_CONNECTION);
+    }
+    delay(100);
+    bm64.powerOff();
+  #endif
 }
 
 
