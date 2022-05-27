@@ -22,6 +22,7 @@ void writeEEPROM() {
     EEPROM.write(CONFIG_START + t, *((char*)&settings + t));
 }
 
+// Advance settings mode +1
 void advSettingMode() {
   if ( settingMode == 0 ) {
     settingMode = settingsArray[0];
@@ -46,15 +47,15 @@ void adjLevel(int8_t change) {
   switch (settingMode) {
     case 1:
       uint8_t dBassModeMax;
-#if LOWCUT
-      dBassModeMax = 2;
-#else
-      dBassModeMax = 1;
-#endif
+      #if LOWCUT
+        dBassModeMax = 2;
+      #else
+        dBassModeMax = 1;
+      #endif
       adjSetting(settings.dBassMode,change, 0, dBassModeMax);
-#if GHETTODSP
-      dBassModeSet();
-#endif
+      #if GHETTODSP
+        dBassModeSet();
+      #endif
       break;
     case 2:
       adjSetting(settings.bassLevel,change, -10, 10);
@@ -83,47 +84,47 @@ void adjLevel(int8_t change) {
     case 8:
       adjSetting(settings.spkMode,change, 0, 4);
       break;
-#if BT
-    case 9:
-      settings.sourceMode = !settings.sourceMode;
-      setSourceMode();
-      break;
-#endif
+    #if BT
+      case 9:
+        settings.sourceMode = !settings.sourceMode;
+        setSourceMode();
+        break;
+    #endif
     case 10:
       adjSetting(settings.channelMode,change, 0, 2);
       setSysGain();
       break;
-#if HOOPTYDSP
-    case 11:
-      adjSetting(settings.faderLevel,change, -10, 10);
-      setFader();
-      break;
-    case 12:
-      adjSetting(settings.xOverMode,change, 0, 7);
-      setDspParams();
-      break;
-    case 13:
-      adjSetting(settings.subharmonicLevel,change, 0, 10);
-      setDspParams();
-      break;
-    case 14:
-      adjSetting(settings.subsonicMode,change, 0, 1);
-      setDspParams();
-      break;
-    case 15:
-      adjSetting(settings.callVolume,change, -20, -6);
-      setCallVolume();
-      break;
-    case 16:
-      adjSetting(settings.midrangeLevel,change,-10,10);
-      setDspParams();
-      break;
-#endif
+    #if HOOPTYDSP
+      case 11:
+        adjSetting(settings.faderLevel,change, -10, 10);
+        setFader();
+        break;
+      case 12:
+        adjSetting(settings.xOverMode,change, 0, 7);
+        setDspParams();
+        break;
+      case 13:
+        adjSetting(settings.subharmonicLevel,change, 0, 10);
+        setDspParams();
+        break;
+      case 14:
+        adjSetting(settings.subsonicMode,change, 0, 1);
+        setDspParams();
+        break;
+      case 15:
+        adjSetting(settings.callVolume,change, -20, -6);
+        setCallVolume();
+        break;
+      case 16:
+        adjSetting(settings.midrangeLevel,change,-10,10);
+        setDspParams();
+        break;
+    #endif
   }
-#if LCD2002 || LCD2004
-  showSettings();
-#endif
-    lastSettingChange = millis();
+  #if LCD2002 || LCD2004
+    showSettings();
+  #endif
+  lastSettingChange = millis();
 }
 
 

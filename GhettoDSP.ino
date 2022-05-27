@@ -108,7 +108,6 @@ bool deviceConnected1 = 0; // Device is connected to slot 1
 bool deviceConnected2 = 0; // Device is connected to slot 2
 bool devicePlaying1 = 0; // Device is playing on slot 1
 bool devicePlaying2 = 0; // Device is playing on slot 2
-bool needToCheckDeviceNames = 0; // Flag to force a query of connected devices
 bool needToLinkBack = 0; // Flag to force a reconnect of previous device(s)
 bool whichLinkToShow = 0; // Flag for LCD display alternating between connected devices
 
@@ -127,9 +126,9 @@ unsigned long lastTimeLinkShown = millis(); // Timer for which device to show
 
 // Set up communication with BT module (UART)
 #if BT
-SoftwareSerial swSerial(UART_RX, UART_TX);
-//AltSoftSerial swSerial(UART_RX, UART_TX);
-BM64 bm64(swSerial, BT_TX_IND);
+  SoftwareSerial swSerial(UART_RX, UART_TX);
+  //AltSoftSerial swSerial(UART_RX, UART_TX);
+  BM64 bm64(swSerial, BT_TX_IND);
 #endif
 
 void setup() {
@@ -139,29 +138,29 @@ void setup() {
   // Start USB serial and UART
   Serial.begin(115200);
 
-#if BT
-  swSerial.begin(9600);
-#endif
+  #if BT
+    swSerial.begin(9600);
+  #endif
 
-#if DEBUG || DEBUG2 || DEBUG3 || DEBUG4 || DEBUG5 || DEBUG6 || DEBUG7
-  Serial.println(F("*****************************"));
-#endif
+  #if DEBUG || DEBUG2 || DEBUG3 || DEBUG4 || DEBUG5 || DEBUG6 || DEBUG7
+    Serial.println(F("*****************************"));
+  #endif
 
-#if HOOPTYDSP
-  // Set up remote output and acc/key sense
-  digitalWrite(REMOTE, LOW);
-  pinMode(REMOTE, OUTPUT);
-  pinMode(PWRON, INPUT); // Input = off, output high = on.
-  pinMode(VACC, INPUT);
-  pinMode(ADC1, INPUT);
-  pinMode(BUTTON, INPUT);
-#endif
+  #if HOOPTYDSP
+    // Set up remote output and acc/key sense
+    digitalWrite(REMOTE, LOW);
+    pinMode(REMOTE, OUTPUT);
+    pinMode(PWRON, INPUT); // Input = off, output high = on.
+    pinMode(VACC, INPUT);
+    pinMode(ADC1, INPUT);
+    pinMode(BUTTON, INPUT);
+  #endif
 
-#if GHETTODSP
-  // GhettoDSP ADC inputs
-  pinMode(ADC0, INPUT);
-  pinMode(ADC1, INPUT);
-#endif
+  #if GHETTODSP
+    // GhettoDSP ADC inputs
+    pinMode(ADC0, INPUT);
+    pinMode(ADC1, INPUT);
+  #endif
 
   // Mute external DAC
   pinMode(SOFT_MUTE, OUTPUT);
@@ -174,82 +173,82 @@ void setup() {
   digitalWrite(DSP_RESET, LOW);
 
   // Start the LCD 20x4
-#if DEBUG
-  Serial.println(F("Starting LCD"));
-#endif
-
-#if LCD2004 || LCD2002
-  #if LCD2004
-    lcd.begin(20, 4);
-  #elif LCD2002
-    lcd.begin(20, 2);
+  #if DEBUG
+    Serial.println(F("Starting LCD"));
   #endif
-  lcd.createChar(0, solidChar); // Sends the custom char to lcd
-  lcd.createChar(1, speakerChar); // Sends the custom char to lcd
-  lcd.createChar(2, playChar); // Sends the custom char to lcd
-  lcd.createChar(3, stopChar); // Sends the custom char to lcd
-#endif
 
-#if DEBUG
-  Serial.println(F("Clearing LCD"));
-#endif
+  #if LCD2004 || LCD2002
+    #if LCD2004
+      lcd.begin(20, 4);
+    #elif LCD2002
+      lcd.begin(20, 2);
+    #endif
+    lcd.createChar(0, solidChar); // Sends the custom char to lcd
+    lcd.createChar(1, speakerChar); // Sends the custom char to lcd
+    lcd.createChar(2, playChar); // Sends the custom char to lcd
+    lcd.createChar(3, stopChar); // Sends the custom char to lcd
+  #endif
 
-#if LCD2002 || LCD2004
-  //lcd.setBacklight(63);
-  lcd.clear();
-  char buffer[21];
-  sprintf(buffer, "S/W Version %s", SW_VERSION);
-  lcdPrintCentered(buffer);
-#endif
+  #if DEBUG
+    Serial.println(F("Clearing LCD"));
+  #endif
+
+  #if LCD2002 || LCD2004
+    //lcd.setBacklight(63);
+    lcd.clear();
+    char buffer[21];
+    sprintf(buffer, "S/W Version %s", SW_VERSION);
+    lcdPrintCentered(buffer);
+  #endif
 
   // Set BT event callback
-#if BT
-  bm64.setCallback(onEventCallback);
-#endif
+  #if BT
+    bm64.setCallback(onEventCallback);
+  #endif
 
   // and Init sigmadsp control
-#if DEBUG
-  Serial.println(F("Init DSP libs"));
-#endif
+  #if DEBUG
+    Serial.println(F("Init DSP libs"));
+  #endif
 
   dsp.begin();
   ee.begin();
 
-#if DEBUG
-  Serial.print(F("EEPROM reply: "));
-  Serial.println(ee.ping() ? F("Not present") : F("Present"));
-#endif
+  #if DEBUG
+    Serial.print(F("EEPROM reply: "));
+    Serial.println(ee.ping() ? F("Not present") : F("Present"));
+  #endif
 
   if ( ee.ping() ) {
-#if LCD2002 || LCD2004
-    lcd.setCursor(0, 1);
-    lcdPrintCentered(F("No EEPROM found!"));
-#endif
+    #if LCD2002 || LCD2004
+      lcd.setCursor(0, 1);
+      lcdPrintCentered(F("No EEPROM found!"));
+    #endif
     while (1);
   }
 
   // Set up encoder
-#if ENCODER
-  setupEncoder();
-#endif
+  #if ENCODER
+    setupEncoder();
+  #endif
 
-#if PWR
-  // Send data to PWR immediately if present
-  sendDataToPWR();
-#endif
+  #if PWR
+    // Send data to PWR immediately if present
+    sendDataToPWR();
+  #endif
 
-#if !PWR && GHETTODSP
-  startAudio();
-#endif
+  #if !PWR && GHETTODSP
+    startAudio();
+  #endif
 
-#if HOOPTYDSP
-  readVoltages();
-  initPowerState();
-#endif
+  #if HOOPTYDSP
+    readVoltages();
+    initPowerState();
+  #endif
 
-#if DEBUG
-  Serial.println(F("Init complete"));
-#endif
+  #if DEBUG
+    Serial.println(F("Init complete"));
+  #endif
 }
 
 
@@ -272,15 +271,6 @@ void loop() {
       if ( needToLinkBack != 0 ) {
         bm64.linkBack();
         needToLinkBack = 0;
-      }
-    #endif
-
-    // Query phone names if new connection event found
-    #if BT
-      if ( needToCheckDeviceNames == 1 ) {
-  //      bm64.getPhoneName1();
-  //      bm64.getPhoneName2();
-        needToCheckDeviceNames = 0;
       }
     #endif
 
@@ -333,34 +323,34 @@ void loop() {
     }
     // Handle these 50ms tasks
     if ( millis() > 50 && millis() - 50 >= last50mSecTask  ) {
-    #if LCD2002 || LCD2004
-      #if VUMETER
-        if ( settingMode == 0 ) {
-          #if LCD2002
-            if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
-              lcdPrintStereoVu(0); // show on line 0
-            } else if ( deviceConnected1 || deviceConnected2 ) {
-              showStatePower(0);
-            }
-          #elif LCD2004
-            if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
-              lcdPrintStereoVu(1); // show on line 1
-            } else if ( statePower == 1 ) {
-              showSettings();
-            }
-          #endif
-        }
+      #if LCD2002 || LCD2004
+        #if VUMETER
+          if ( settingMode == 0 ) {
+            #if LCD2002
+              if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
+                lcdPrintStereoVu(0); // show on line 0
+              } else if ( deviceConnected1 || deviceConnected2 ) {
+                showStatePower(0);
+              }
+            #elif LCD2004
+              if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
+                lcdPrintStereoVu(1); // show on line 1
+              } else if ( statePower == 1 ) {
+                showSettings();
+              }
+            #endif
+          }
+        #endif
       #endif
-    #endif
 
       last50mSecTask = millis();
     }
 
     // Handle these 5-sec tasks
     if ( millis() > 5000 && millis() - 5000 >= last5SecTask  ) {
-#if BT
-      getMetaData();
-#endif
+      #if BT
+        getMetaData();
+      #endif
       #if LCD2004 && ( (GHETTODSP && PWR) || HOOPTYDSP )
         showStatePower(0); // show on line 0
       #endif
@@ -372,17 +362,17 @@ void loop() {
       last1SecTask = millis();
     }
 
-#if HOOPTYDSP
-    checkPowerButton();
-#endif
+    #if HOOPTYDSP
+      checkPowerButton();
+    #endif
 
   } else {
     
     ////////////////////// Stuff to do in powered down state //////////////////////
 
-#if HOOPTYDSP
-    checkPowerButton();
-#endif
+    #if HOOPTYDSP
+      checkPowerButton();
+    #endif
 
     // Handle these 5-sec tasks
     if ( millis() > 5000 && millis() - 5000 >= last5SecTask  ) {
@@ -394,13 +384,13 @@ void loop() {
     
     // Handle these 500ms tasks
     if ( millis() > 500 && millis() - 500 >= last500mSecTask  ) {
-#if PWR
-      getDataFromPWR();
-#endif
+      #if PWR
+        getDataFromPWR();
+      #endif
 
-#if HOOPTYDSP
-      readVoltages();
-#endif
+      #if HOOPTYDSP
+        readVoltages();
+      #endif
       last500mSecTask = millis();
     }
   }

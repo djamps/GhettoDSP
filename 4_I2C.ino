@@ -36,9 +36,9 @@ void sendDataToPWR(bool disableWatchDog) {
 void getDataFromPWR() {
   uint8_t currentPowerState = statePower;
 
-#if DEBUG3
-  Serial.print(F("Asking PWR for data..."));
-#endif
+  #if DEBUG3
+    Serial.print(F("Asking PWR for data..."));
+  #endif
 
   Wire.requestFrom(PWR_I2C_ADDRESS, 21);
 
@@ -58,45 +58,44 @@ void getDataFromPWR() {
       Serial.print(F("Got data"));
     }
 
-#if LCD2002 || LCD2004
-    // Don't override start banner until at least 5 seconds
-    if ( millis() > 5000 ) {
-      showStatePower(0);
-    }
-#endif
+  #if LCD2002 || LCD2004
+      // Don't override start banner until at least 5 seconds
+      if ( millis() > 5000 ) {
+        showStatePower(0);
+      }
+  #endif
 
     // Power state changed, handle accordingly
     if ( currentPowerState != statePower ) {
       if ( statePower == 1 ) {
-#if DEBUG3
+      #if DEBUG3
         Serial.println(F("*****Power state change to ON*****"));
-#endif
+      #endif
         startAudio();
       } else {
-#if DEBUG3
+      #if DEBUG3
         Serial.println(F("*****Power state change to OFF*****"));
-#endif
+      #endif
         stopAudio();
-#if LCD2002 || LCD2004
+      #if LCD2002 || LCD2004
         showPowerOff();
-#endif
+      #endif
       }
     }
-#if LCD2002 || LCD2004
-    if ( stateCharging == 1 && statePower == 0 ) {
-      showPowerOff();
-    }
-#endif
+    #if LCD2002 || LCD2004
+      if ( stateCharging == 1 && statePower == 0 ) {
+        showPowerOff();
+      }
+    #endif
   } else {
-#if DEBUG3
-    Serial.println(F("No response from PWR!"));
-#endif
+    #if DEBUG3
+      Serial.println(F("No response from PWR!"));
+    #endif
 
-#if LCD2002 || LCD2004
-    lcd.setCursor(0, 0);
-    lcdPrintCentered(F("Comm Failure"));
-#endif
+    #if LCD2002 || LCD2004
+      lcd.setCursor(0, 0);
+      lcdPrintCentered(F("Comm Failure"));
+    #endif
   }
-
 }
 #endif

@@ -1,22 +1,29 @@
 #if BT
 
+#if HOOPTYDSP
 // Accept a call
 void acceptCall() {
   bm64.mmiAction(BM64_MMI_ACCEPT_CALL);
 }
+#endif
 
+#if HOOPTYDSP
+// Hang up a call
 void endCall() {
   bm64.mmiAction(BM64_MMI_FORCE_END_CALL);
 }
+#endif
 
+#if HOOPTYDSP
 void voiceDial() {
   bm64.mmiAction(BM64_MMI_VOICE_DIAL);
 }
+#endif
 
 //Check UART Event
 void checkUartEvent() {
   bm64.run();
-  if ( DEBUG ) {
+  #if DEBUG
     if (Serial.available() > 0)
     {
       // read the incoming byte:
@@ -32,13 +39,13 @@ void checkUartEvent() {
           break;
       }
     }
-  }
+  #endif
 }
 
 void bm64StartPageScan() {
-#if DEBUG5
-  Serial.println(F("Begin page scan"));
-#endif
+  #if DEBUG5
+    Serial.println(F("Begin page scan"));
+  #endif
   switch ( settings.spkMode ) {
     case 1:
       bm64MasterPage();
@@ -124,11 +131,11 @@ void setSpkMode() {
 void setBTName() {
   char buffer[29];
   if ( settings.spkMode == 1 || settings.spkMode == 3 ) {
-    sprintf(buffer, ftc(F("%s%s")), SPEAKER_NAME, ftc(F("(Master)")));
+    sprintf(buffer, "%s%s", SPEAKER_NAME, "(Master)");
   } else if ( settings.spkMode == 2 || settings.spkMode == 4 ) {
-    sprintf(buffer, ftc(F("%s%s")), SPEAKER_NAME, ftc(F("(Slave)")));
+    sprintf(buffer, "%s%s", SPEAKER_NAME, "(Slave)");
   } else {
-    sprintf(buffer, ftc(F("%s")), SPEAKER_NAME);
+    sprintf(buffer, "%s", SPEAKER_NAME);
   }
   bm64.setName(buffer);
 }
@@ -149,7 +156,6 @@ void resetBT() {
   digitalWrite(BT_RESET, LOW);
   delay(100);
   pinMode(BT_RESET, INPUT);
-  //delay(500);
 }
 
 
@@ -160,86 +166,88 @@ void resetBT() {
 void onEventCallback(BM64_event_t *event) {
   const char null = '\0';
   // Log all events and their payload
-#if DEBUG5
-  Serial.print(F("[ EVENT "));
-  Serial.print(event->event_code, HEX);
-  Serial.print(F(" ]: "));
-  for (uint8_t i = 0; i < event->param_len; i++) {
-    Serial.print(event->parameter[i], HEX);
-    Serial.print(F(" "));
-  }
-  Serial.println();
-#endif
+  #if DEBUG5
+    Serial.print(F("[ EVENT "));
+    Serial.print(event->event_code, HEX);
+    Serial.print(F(" ]: "));
+    for (uint8_t i = 0; i < event->param_len; i++) {
+      Serial.print(event->parameter[i], HEX);
+      Serial.print(F(" "));
+    }
+    Serial.println();
+  #endif
 
   // Call related events
-#if HOOPTYDSP
-
-  // SCO active (phone/siri audio)
-  if ( event->event_code == BM64_EVENT_DEVICE_STATE && event->parameter[0] == 0x09 ) {
-    // Override volume to preset level
-    callActive = true;
-    setCallVolume(); // Override volume knob
-    settingMode = 15; // Show call volume setting
-    showSettings(); // Show call volume setting
-    showMetaData(); // Show call info
-  // SCO ends
-  } else if ( event->event_code == BM64_EVENT_DEVICE_STATE && event->parameter[0] == 0x0A ) {
-    // Put volume back to normal
-    callActive = false;
-    callerID[0] = null;
-    setCallVolume();
-    settingMode = 0;
-    showSettings();
-  }
-
-  //Caller ID
-  if ( event->event_code == BM64_EVENT_CALL_ID && event->parameter[0] == 0x00 ) {
-    for (uint8_t i = 1; i < event->param_len; i++) {
-      callerID[i-1] = event->parameter[i];
+  #if HOOPTYDSP
+  
+    // SCO active (phone/siri/nav audio)
+    if ( event->event_code == BM64_EVENT_DEVICE_STATE && event->parameter[0] == 0x09 ) {
+      // Override volume to preset level
+      callActive = true;
+      setCallVolume(); // Override volume knob
+      settingMode = 15; // Show call volume setting
+      showSettings(); // Show call volume setting
+      showMetaData(); // Show call info
+    // SCO ends
+    } else if ( event->event_code == BM64_EVENT_DEVICE_STATE && event->parameter[0] == 0x0A ) {
+      // Put volume back to normal
+      callActive = false;
+      callerID[0] = null;
+      setCallVolume();
+      settingMode = 0;
+      showSettings();
     }
-    callerID[event->param_len - 1] = null;
-  }
-
-  // Call in progress
-  if ( event->event_code == BM64_EVENT_CALL_STATUS && event->parameter[1] == 0x04 ) {
-    callInProgress = true;
-  // Call no longer in progress
-  } else if  (event->event_code == BM64_EVENT_CALL_STATUS && event->parameter[1] == 0x00 ) {
-    callInProgress = false;
-  }
-
-#endif
+  
+    // Caller ID
+    if ( event->event_code == BM64_EVENT_CALL_ID && event->parameter[0] == 0x00 ) {
+      for (uint8_t i = 1; i < event->param_len; i++) {
+        callerID[i-1] = event->parameter[i];
+      }
+      callerID[event->param_len - 1] = null;
+    }
+  
+    // Call in progress
+    if ( event->event_code == BM64_EVENT_CALL_STATUS && event->parameter[1] == 0x04 ) {
+      callInProgress = true;
+    // Call no longer in progress
+    } else if  (event->event_code == BM64_EVENT_CALL_STATUS && event->parameter[1] == 0x00 ) {
+      callInProgress = false;
+    }
+  
+  #endif
 
   // nSPK event
   if ( event->event_code == BM64_EVENT_REPORT_nSPK_STATUS ) {
-    bool updateLcd = 0;
+    //bool updateLcd = 0;
     if ( event->parameter[1] <= 7 ) {
       if ( NSPK_CONNECT != event->parameter[0]) {
         NSPK_CONNECT = event->parameter[0];
-        updateLcd = 1;
+        //updateLcd = 1;
       }
     }
     if ( event->parameter[2] <= 9 ) {
       if ( NSPK_STATE != event->parameter[1]) {
         NSPK_STATE = event->parameter[1];
         NSPK_GROUP = event->parameter[2];
-        updateLcd = 1;
+        //updateLcd = 1;
       }
     }
 
-#if LCD2004 || LCD2002
-    if ( updateLcd == 1 && settingMode == 0 ) {
-      showSettings();
-    }
-#endif
-#if DEBUG6
-    Serial.print(F("[ NSPK STATUS ] "));
-    for (uint8_t i = 0; i < event->param_len; i++) {
-      Serial.print(event->parameter[i], HEX);
-      Serial.print(F(" "));
-    }
-    Serial.println();
-#endif
+// showSettings() already called by main loop
+//#if LCD2004 || LCD2002
+//    if ( updateLcd == 1 && settingMode == 0 ) {
+//      showSettings();
+//    }
+//#endif
+
+  #if DEBUG6
+      Serial.print(F("[ NSPK STATUS ] "));
+      for (uint8_t i = 0; i < event->param_len; i++) {
+        Serial.print(event->parameter[i], HEX);
+        Serial.print(F(" "));
+      }
+      Serial.println();
+  #endif
   }
 
   // Metadata event
@@ -293,7 +301,6 @@ void onEventCallback(BM64_event_t *event) {
     if ( DEBUG5 ) {
       Serial.println(F("Aux is silent"));
     }
-    //showMetaData();
   }
 
   if ( event->event_code == 0x1b && event->parameter[0] == 0x01 && event->parameter[1] == 0x02 ) {
@@ -301,7 +308,6 @@ void onEventCallback(BM64_event_t *event) {
     if ( DEBUG5 ) {
       Serial.println(F("Aux is playing"));
     }
-    //showMetaData();
   }
 
   // Link disconnect link 1
@@ -324,7 +330,6 @@ void onEventCallback(BM64_event_t *event) {
 
   // Link connect
   if ( event->event_code == BM64_EVENT_AVRCP_SPEC_RSP && ( event->parameter[0] == 0x00 || event->parameter[0] == 0x01 ) ) {
-    //needToCheckDeviceNames = 1;
     bm64.getPhoneName(event->parameter[0]);
   }
 
@@ -340,7 +345,6 @@ void onEventCallback(BM64_event_t *event) {
       if ( devicePlaying2 == 0) {
         metaDataSong[0] = null;
         metaDataArtist[0] = null;
-        //showMetaData();
       }
     }
   }
@@ -350,17 +354,17 @@ void onEventCallback(BM64_event_t *event) {
     if (  event->parameter[12] == 1 ) {
       devicePlaying2 = 1;
       getMetaData();
-      showLinks();
-      //showMetaData();
+      #if LCD2004 || LCD2002
+        showLinks();
+      #endif
     } else {
       devicePlaying2 = 0;
-      #if LCD2004
+      #if LCD2004 || LCD2002
         showLinks();
       #endif
       if ( devicePlaying1 == 0) {
         metaDataSong[0] = null;
         metaDataArtist[0] = null;
-        //showMetaData();
       }
     }
   }

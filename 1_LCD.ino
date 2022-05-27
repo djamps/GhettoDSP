@@ -88,65 +88,63 @@ void lcdPrintStereoVu(uint8_t row)
     lcd.print((char)0);
   }
   #if VUPEAK
-  while (column++ < 10 - peakL)
-  #else
-  while (column++ < 10)
-  #endif
-  {
-    lcd.setCursor(column-1, row);
-    lcdPrintSpace();
-  }
-
-  // Right meter (Backwards from right side)
-  for (column = 19; column > 19 - currentGraphR; column--)
-  {
-    lcd.setCursor(column, row);
-    lcd.print((char)0);
-  }
-  column++;
-  #if VUPEAK
-  while (column-- > 10 + peakR)
-  #else
-  while (column-- > 10)
-  #endif
-  {
-    lcd.setCursor(column, row);
-    lcdPrintSpace();
-  }
-
+    while (column++ < 10 - peakL)
+    #else
+    while (column++ < 10)
+    #endif
+    {
+      lcd.setCursor(column-1, row);
+      lcdPrintSpace();
+    }
   
-#else // Forward meters
+    // Right meter (Backwards from right side)
+    for (column = 19; column > 19 - currentGraphR; column--)
+    {
+      lcd.setCursor(column, row);
+      lcd.print((char)0);
+    }
+    column++;
+    #if VUPEAK
+    while (column-- > 10 + peakR)
+    #else
+    while (column-- > 10)
+    #endif
+    {
+      lcd.setCursor(column, row);
+      lcdPrintSpace();
+    }
 
-
-  // Left meter (backward from middle)
-  for (column = 10; column > 10 - currentGraphL; column--)
-  {
-    lcd.setCursor(column-1, row);
-    lcd.print((char)0);
-  }
-  column++;
-  while (column-- > 0)
-  {
-    lcd.setCursor(column-1, row);
-    lcdPrintSpace();
-  }
-
-  // Right meter (forward from middle)
-  for (column = 10; column < 10 + currentGraphR; column++)
-  {
-    lcd.setCursor(column, row);
-    lcd.print((char)0);
-  }
-  column--;
-  while (column++ < 19)
-  {
-    lcd.setCursor(column, row);
-    lcdPrintSpace();
-  }
-#endif
+  #else // Forward meters
+  
+    // Left meter (backward from middle)
+    for (column = 10; column > 10 - currentGraphL; column--)
+    {
+      lcd.setCursor(column-1, row);
+      lcd.print((char)0);
+    }
+    column++;
+    while (column-- > 0)
+    {
+      lcd.setCursor(column-1, row);
+      lcdPrintSpace();
+    }
+  
+    // Right meter (forward from middle)
+    for (column = 10; column < 10 + currentGraphR; column++)
+    {
+      lcd.setCursor(column, row);
+      lcd.print((char)0);
+    }
+    column--;
+    while (column++ < 19)
+    {
+      lcd.setCursor(column, row);
+      lcdPrintSpace();
+    }
+  #endif
   #if VUSLOW
-  if ( graphLastL > 6 ) { graphLastL-=2; } else if ( graphLastL > 0 )  { graphLastL--; }
-  if ( graphLastR > 6 ) { graphLastR-=2; } else if ( graphLastR > 0 )  { graphLastR--; }
+    if ( graphLastL > 6 ) { graphLastL-=2; } else if ( graphLastL > 0 )  { graphLastL--; }
+    if ( graphLastR > 6 ) { graphLastR-=2; } else if ( graphLastR > 0 )  { graphLastR--; }
   #endif
 }
 #endif
@@ -338,11 +336,11 @@ void showStatePower(const uint8_t line) {
 
 
 void showLinks() {
-#if LCD2004
-  const uint8_t line = 3;
-#elif LCD2002
-  const uint8_t line = 1;
-#endif
+  #if LCD2004
+    const uint8_t line = 3;
+  #elif LCD2002
+    const uint8_t line = 1;
+  #endif
   if ( !whichLinkToShow && deviceConnected1  ) {
     lcd.setCursor(0, line);
     lcd.print(F("Link1:"));
@@ -355,26 +353,26 @@ void showLinks() {
     for ( uint8_t i = strlen(phoneName1); i < 13; i++ ) {
       lcdPrintSpace();
     } 
-#if !HOOPTYDSP
-  } else if ( deviceConnected2 ) {
-
-    lcd.setCursor(0, line);
-    lcd.print(F("Link2:"));
-    if ( devicePlaying2 == 1 ) {
-      lcd.print((char)2);
-    } else {
-      lcd.print((char)3);
-    }
-    lcd.print(phoneName2);
-    for ( uint8_t i = strlen(phoneName2); i < 13; i++ ) {
-      lcdPrintSpace();
-    }
-#endif
-#if GHETTODSP // Two connections allowed
-  } else if ( !devicePlaying1 && !devicePlaying2 && ( !deviceConnected1 || !deviceConnected2 )) {
-#else // Only one connection allowed
-  } else if ( !deviceConnected1 ) {
-#endif
+  #if !HOOPTYDSP
+    } else if ( deviceConnected2 ) {
+  
+      lcd.setCursor(0, line);
+      lcd.print(F("Link2:"));
+      if ( devicePlaying2 == 1 ) {
+        lcd.print((char)2);
+      } else {
+        lcd.print((char)3);
+      }
+      lcd.print(phoneName2);
+      for ( uint8_t i = strlen(phoneName2); i < 13; i++ ) {
+        lcdPrintSpace();
+      }
+  #endif
+  #if GHETTODSP // Two connections allowed
+    } else if ( !devicePlaying1 && !devicePlaying2 && ( !deviceConnected1 || !deviceConnected2 )) {
+  #else // Only one connection allowed
+    } else if ( !deviceConnected1 ) {
+  #endif
     if (!deviceConnected1 && settings.sourceMode != 2 && settings.spkMode != 4 ) {
       //lcd.setCursor(0, 2);
       #if LCD2002
@@ -402,7 +400,6 @@ char * lcdGetDb(int8_t val, char * buf) {
 }
 
 void showSettings() {
-  //lcdClearLine(1);
   char buf[21];
   #if LCD2004
     lcd.setCursor(0, 1);
@@ -451,31 +448,30 @@ void showSettings() {
     case 10:
       lcdPrintSetting(ftc(F("Channel")),lcdGetChannelMode(buf));
       break;
-#if HOOPTYDSP
-    case 11:
-      lcdPrintSetting(ftc(F("Fader")),lcdGetFaderLevel(buf));
-      break;
-    case 12:
-      lcdPrintSetting(ftc(F("Crossover")),lcdGetXoverMode(buf));
-      break;
-    case 13:
-      lcdPrintSetting(ftc(F("Subharmonics")),settings.subharmonicLevel);
-      break;
-    case 14:
-      lcdPrintSetting(ftc(F("Subsonic Filter")),lcdGetOnOff(settings.subsonicMode,buf));
-      break;
-    case 15:
-      lcdPrintSetting(ftc(F("Call Volume")),lcdGetDb(settings.callVolume,buf));
-      break;
-    case 16:
-      lcdPrintSetting(ftc(F("Mid")),lcdGetDb(settings.midrangeLevel,buf));
-      break;
-#endif
+    #if HOOPTYDSP
+      case 11:
+        lcdPrintSetting(ftc(F("Fader")),lcdGetFaderLevel(buf));
+        break;
+      case 12:
+        lcdPrintSetting(ftc(F("Crossover")),lcdGetXoverMode(buf));
+        break;
+      case 13:
+        lcdPrintSetting(ftc(F("Subharmonics")),settings.subharmonicLevel);
+        break;
+      case 14:
+        lcdPrintSetting(ftc(F("Subsonic Filter")),lcdGetOnOff(settings.subsonicMode,buf));
+        break;
+      case 15:
+        lcdPrintSetting(ftc(F("Call Volume")),lcdGetDb(settings.callVolume,buf));
+        break;
+      case 16:
+        lcdPrintSetting(ftc(F("Mid")),lcdGetDb(settings.midrangeLevel,buf));
+        break;
+    #endif
   }
 }
 
 void lcdPrintSpkStatus() {
-  //#if !VUMETER
   if ( settings.spkMode > 0 ) {
     char buffer[21];
     char buff[11];
@@ -494,13 +490,12 @@ void lcdPrintSpkStatus() {
     }
     lcdPrintCentered(buffer);
   } else {
-#if GHETTODSP
-    lcdPrintCentered(F("Single Speaker Mode"));
-#elif HOOPTYDSP
-    lcdPrintCentered(F(" "));
-#endif
+  #if GHETTODSP
+      lcdPrintCentered(F("Single Speaker Mode"));
+  #elif HOOPTYDSP
+      lcdPrintCentered(F(" "));
+  #endif
   }
-  //#endif
 }
 
 const char * lcdGetSpkMode(char * buf) {
