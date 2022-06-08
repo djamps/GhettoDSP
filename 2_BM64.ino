@@ -138,6 +138,7 @@ void setBTName() {
     sprintf(buffer, "%s", SPEAKER_NAME);
   }
   bm64.setName(buffer);
+  bm64.setName(buffer);
 }
 
 
