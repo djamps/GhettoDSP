@@ -7,6 +7,7 @@ BM64 Tools/
 SigmaDSP/
 EZ-USB/
 PCB/
+*.lst
 
 # Prerequisites
 *.d
