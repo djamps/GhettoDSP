@@ -78,7 +78,7 @@ void adjLevel(int8_t change) {
       setDspParams();
       break;
     case 7:
-      adjSetting(settings.gainLevel,change, -6, 0);
+      adjSetting(settings.gainLevel,change, -6, 6);
       setSysGain();
       break;
     case 8:
