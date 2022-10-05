@@ -251,8 +251,8 @@ void setup() {
       
       #if PWR
         audioDetected = true;
-        disableWatchDog();
         sendDataToPWR();
+        disableWatchDog();
       #endif
       
       #if BT
