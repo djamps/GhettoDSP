@@ -12,6 +12,14 @@ void setupEncoder() {
   aLast = digitalRead(ENCODER_DT);
 }
 
+bool buttonState() {
+  if (digitalRead(ENCODER_SW) == LOW) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 void handleEncoder() {
   // If enough time has passed check the rotary encoder
   if ((millis() - lastDebounce) > encoderDebounceDelay) {

@@ -16,7 +16,7 @@
 #include <I2C_Anything.h>
 #endif
 
-#define SW_VERSION "1.13"
+#define SW_VERSION "1.20"
 #define CONFIG_VERSION "1.2" // Must be increased whenever persistant config params are modified
 #define CONFIG_START 32 // Where in EEPROM to store persistant config
 #define PWR_I2C_ADDRESS 0x30 // I2C address of power supply
@@ -94,6 +94,7 @@ uint8_t statePower = 2; // Power state reported from power module (1 = on, 0 = o
 bool stateCharging; // Charge state reported from power module (1 = charging, 0 = discharging)
 uint8_t percentBattery = 0; // Battery state reported from power module
 uint8_t stateSys = 0; // System/LED status reported from power module
+bool audioDetected = 0; // DSP audio output detect
 
 uint8_t stateBattery = 2; // Battery state from power module (assume good)
 
@@ -232,11 +233,61 @@ void setup() {
     setupEncoder();
   #endif
 
+  // ** PROGRAMMER/USBi MODE **
+  // Hold encoder down during power-on
+  // to halt CPU for live programming via
+  // USBi/Sigmastudio
+  
+  // Order of operations:
+  // 1. Power on DSP with encoder down
+  // 2. Connect programmer to USB
+  // 3. Connect USBi
+  // 4. In sigmastudio: "Link compile download"
+  // 5. Toggle Line In / BT Audio by pressing encoder
+  
+  #if ENCODER
+    char buf[21];
+    if ( buttonState() == true ) {
+      
+      #if PWR
+        audioDetected = true;
+        disableWatchDog();
+        sendDataToPWR();
+      #endif
+      
+      #if BT
+        bm64.powerOn();
+      #endif
+      
+      #if LCD2002 || LCD2004
+        lcd.setCursor(0, 1);
+        lcdPrintCentered("Program Mode");
+        lcd.setCursor(0, 2);
+        lcdPrintCentered(lcdGetSourceMode(buf));
+      #endif
+
+      pinMode(DSP_RESET, INPUT);
+      pinMode(DSP_WP, INPUT);
+
+      // Toggle input modes
+      while ( buttonState() == true );
+      while(1) {
+        while ( buttonState() == false );
+        while ( buttonState() == true );
+        settings.sourceMode = !settings.sourceMode;
+        setSourceMode();
+        lcd.setCursor(0, 2);
+        lcdPrintCentered(lcdGetSourceMode(buf));
+      }
+    }
+  #endif
+
   #if PWR
     // Send data to PWR immediately if present
     sendDataToPWR();
   #endif
 
+  // For standalone DSP card, start audio immediately
   #if !PWR && GHETTODSP
     startAudio();
   #endif
@@ -295,7 +346,9 @@ void loop() {
       if ( !callActive) {
         settingMode = 0;
       }
-      showSettings();
+      #if LCD2002 || LCD2004
+        showSettings();
+      #endif
       #if BT
         if ( currentSpkMode != settings.spkMode ) {
           setBTName();

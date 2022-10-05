@@ -83,11 +83,12 @@ void bm64SlaveBroadcastPage() {
 }
 
 #if LINEINBT
-void setSourceMode() {
+void setSourceModeBT() {
   if ( BT ) {
     if ( settings.sourceMode == 1 ) {
-      bm64.lineInEnable();
       bm64.mmiAction(BM64_MMI_EXIT_PAIRING_MODE);
+      bm64.mmiAction(BM64_MMI_DISCONNECT_A2DP);
+      bm64.lineInEnable();
     } else {
       bm64.lineInDisable();
       bm64.mmiAction(BM64_MMI_ANY_MODE_ENTERING_PAIRING);

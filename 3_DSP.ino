@@ -1,5 +1,3 @@
-bool audioDetected = 0; // DSP audio output detect // default to on during startup
-
 #if GHETTODSP
 void dBassModeSet() {
   switch ( settings.dBassMode ) {
@@ -294,20 +292,31 @@ void startAudio() {
 
 }
 
-#if LINEINDSP
+
 void setSourceMode() {
-  switch ( settings.sourceMode ) {
-    case 0:
-      dsp.dcSource(MOD_AUXL_MONOSWSLEW_ADDR, uint32_t(0));
-      dsp.dcSource(MOD_AUXR_MONOSWSLEW_ADDR, uint32_t(0));
-      break;
-    case 1:
-      dsp.dcSource(MOD_AUXL_MONOSWSLEW_ADDR, uint32_t(1));
-      dsp.dcSource(MOD_AUXR_MONOSWSLEW_ADDR, uint32_t(1));
-      break;
-  }
+
+  #if LINEINDSP
+    #if !LINEINBT // Pass line-in ADC's directly through DSP
+      switch ( settings.sourceMode ) {
+        case 0:
+          dsp.dcSource(MOD_INPUTSELECTL_MONOSWSLEW_ADDR, uint32_t(0));
+          dsp.dcSource(MOD_INPUTSELECTR_MONOSWSLEW_ADDR, uint32_t(0));
+          break;
+        case 1:
+          dsp.dcSource(MOD_INPUTSELECTL_MONOSWSLEW_ADDR, uint32_t(1));
+          dsp.dcSource(MOD_INPUTSELECTR_MONOSWSLEW_ADDR, uint32_t(1));
+          break;
+      }
+    #else // Pass line-in ADC to BM64
+      // Do nothing, because we're always doing that
+    #endif
+  #endif
+
+  #if LINEINBT
+    setSourceModeBT();
+  #endif
 }
-#endif
+
 
 void checkForAudio() {
   if ( dsp.readBack(MOD_READBACK1_ALG0_VAL0_ADDR, MOD_READBACK1_ALG0_VAL0_VALUES, 3) == 0 ) {

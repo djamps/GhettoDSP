@@ -55,7 +55,20 @@ void getDataFromPWR() {
     I2C_readAnything(stateBattery);
 
     if ( DEBUG3 ) {
-      Serial.print(F("Got data"));
+      Serial.print(F("vBattAvg: "));
+      Serial.print(voltageBattAvg);
+      Serial.print(F(" tempC: "));
+      Serial.print(tempC);
+      Serial.print(F(" statePower: "));
+      Serial.print(statePower);
+      Serial.print(F(" stateCharging: "));
+      Serial.print(stateCharging);
+      Serial.print(F(" stateSys: "));
+      Serial.print(stateSys);
+      Serial.print(F(" percentBattery: "));
+      Serial.print(percentBattery);
+      Serial.print(F(" stateBattery: "));
+      Serial.print(stateBattery);
     }
 
   #if LCD2002 || LCD2004
