@@ -308,9 +308,7 @@ void showStatePower(const uint8_t line) {
   char vTmp[5] = "----";
   char pTmp[4] = "---";
 
-  //if ( voltageBattAvg > 9 ) {
-    dtostrf(voltageBattAvg, 4, 1, vTmp);
-  //}
+  dtostrf(voltageBattAvg, 4, 1, vTmp);
 
 #if GHETTODSP
   if ( tempC > 0 ) {
