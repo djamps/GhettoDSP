@@ -70,7 +70,6 @@ void getDataFromPWR() {
       Serial.print(F(" stateBattery: "));
       Serial.print(stateBattery);
     }
-
   #if LCD2002 || LCD2004
       // Don't override start banner until at least 5 seconds
       if ( millis() > 5000 ) {
@@ -80,7 +79,7 @@ void getDataFromPWR() {
 
     // Power state changed, handle accordingly
     if ( currentPowerState != statePower ) {
-      if ( statePower == 1 ) {
+      if ( statePower == 1 && stateBattery == 2 ) { // Only start audio if battery is GOOD
       #if DEBUG3
         Serial.println(F("*****Power state change to ON*****"));
       #endif

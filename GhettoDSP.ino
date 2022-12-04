@@ -96,7 +96,11 @@ uint8_t percentBattery = 0; // Battery state reported from power module
 uint8_t stateSys = 0; // System/LED status reported from power module
 bool audioDetected = 0; // DSP audio output detect
 
-uint8_t stateBattery = 2; // Battery state from power module (assume good)
+#if PWR || HOOPTY
+int8_t stateBattery = -1; // Battery state from power module (-1 = unknown)
+#else
+int8_t stateBattery = 2; // Battery state from power module (2 = good)
+#endif
 
 char phoneName1[14]; // Name of BT device on connection 1
 char phoneName2[14]; // Name of BT device on connection 2
@@ -201,12 +205,12 @@ void setup() {
     sprintf(buffer, "S/W Version %s", SW_VERSION);
     lcdPrintCentered(buffer);
   #endif
-
+  
   // Set BT event callback
   #if BT
     bm64.setCallback(onEventCallback);
   #endif
-
+  
   // and Init sigmadsp control
   #if DEBUG
     Serial.println(F("Init DSP libs"));
@@ -300,6 +304,7 @@ void setup() {
   #if DEBUG
     Serial.println(F("Init complete"));
   #endif
+
 }
 
 
@@ -420,7 +425,6 @@ void loop() {
     #endif
 
   } else {
-    
     ////////////////////// Stuff to do in powered down state //////////////////////
 
     #if HOOPTYDSP
