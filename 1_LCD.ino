@@ -263,7 +263,11 @@ void showMetaData() {
   lcd.setCursor(0, line);
   if ( settings.sourceMode == 1 )
   {
+    #if LINEINDSP
+    if ( audioDetected == 1 ) {
+    #else
     if ( auxDetect == 1 ) {
+    #endif
       lcdPrintCentered(F("Aux-in Playing"));
     } else {
       lcdPrintCentered(F("Aux-in Silence"));

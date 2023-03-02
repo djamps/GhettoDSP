@@ -16,7 +16,7 @@
 #include <I2C_Anything.h>
 #endif
 
-#define SW_VERSION "1.20"
+#define SW_VERSION "1.21"
 #define CONFIG_VERSION "1.2" // Must be increased whenever persistant config params are modified
 #define CONFIG_START 32 // Where in EEPROM to store persistant config
 #define PWR_I2C_ADDRESS 0x30 // I2C address of power supply
@@ -385,13 +385,15 @@ void loop() {
         #if VUMETER
           if ( settingMode == 0 ) {
             #if LCD2002
-              if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
+              //if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
+              if ( audioDetected == 1 && statePower == 1 ) {
                 lcdPrintStereoVu(0); // show on line 0
               } else if ( deviceConnected1 || deviceConnected2 ) {
                 showStatePower(0);
               }
             #elif LCD2004
-              if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
+              //if ( (devicePlaying1 || devicePlaying2) && statePower == 1 ) {
+              if ( audioDetected == 1 && statePower == 1 ) {
                 lcdPrintStereoVu(1); // show on line 1
               } else if ( statePower == 1 ) {
                 showSettings();

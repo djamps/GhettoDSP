@@ -298,11 +298,13 @@ void setSourceMode() {
   #if LINEINDSP
     #if !LINEINBT // Pass line-in ADC's directly through DSP
       switch ( settings.sourceMode ) {
-        case 0:
+        case 0: // BT In
+          bm64.powerOn(); // Enable bluetooth
           dsp.dcSource(MOD_INPUTSELECTL_MONOSWSLEW_ADDR, uint32_t(0));
           dsp.dcSource(MOD_INPUTSELECTR_MONOSWSLEW_ADDR, uint32_t(0));
           break;
-        case 1:
+        case 1: // Aux In
+          bm64.powerOff(); // Disable bluetooth
           dsp.dcSource(MOD_INPUTSELECTL_MONOSWSLEW_ADDR, uint32_t(1));
           dsp.dcSource(MOD_INPUTSELECTR_MONOSWSLEW_ADDR, uint32_t(1));
           break;
