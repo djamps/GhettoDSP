@@ -53,11 +53,11 @@ void lcdPrintStereoVu(uint8_t row)
     lastPeakR = millis();
   }
 
-  if ( millis() - 1000 >= lastPeakL ) {
+  if ( millis() - 250 >= lastPeakL ) {
     peakL = 0;
   }
 
-  if ( millis() - 1000 >= lastPeakR ) {
+  if ( millis() - 250 >= lastPeakR ) {
     peakR = 0;
   }
 
