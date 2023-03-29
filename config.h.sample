@@ -4,6 +4,7 @@
 #define BROWNOUTVOLTAGE       11.5 // PWR or hoopty Shutoff if battery voltage is below this
 #define VOLTAGEBATTMAXCHARGE  13.8 // PWR module Stop charging when battery reaches this level
 #define VCOMP                 27.6 // PWR or hoopty ADC calibration
+#define DSP_WAIT              700  // Time (mS) to wait for DSP to selfboot
 
 #define SPEAKER_NAME "BlasterJ1" // Bluetooth name (20 char max)
 //                   "--------------------"

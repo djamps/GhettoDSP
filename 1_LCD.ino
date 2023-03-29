@@ -12,6 +12,17 @@ unsigned long lastPeakL;
 unsigned long lastPeakR;
 #endif
 
+#if GHETTODSP
+float battLevel0 = 12.7;
+float battLevel20 = 12.9;
+float battLevel40 = 13.0;
+float battLevel60 = 13.1;
+float battLevel80 = 13.2;
+float battLevel100 = 13.5;
+uint8_t battAnimate = 0;
+uint8_t battFlash = 0;
+#endif
+
 #if VUMETER
 void lcdPrintStereoVu(uint8_t row)
 {
@@ -268,9 +279,9 @@ void showMetaData() {
     #else
     if ( auxDetect == 1 ) {
     #endif
-      lcdPrintCentered(F("Aux-in Playing"));
+      lcdPrintCentered("Aux-in Playing");
     } else {
-      lcdPrintCentered(F("Aux-in Silence"));
+      lcdPrintCentered("Aux-in Silence");
     }
   } else {
     if ( !callActive ) {
@@ -300,7 +311,7 @@ void showMetaData() {
       if ( strlen ( callerID ) > 0 ) {
         lcdPrintScroll(callerID);
       } else {
-        lcdPrintCentered(F("Call In Progress"));
+        lcdPrintCentered("Call In Progress");
       }
     }
   }
@@ -321,21 +332,76 @@ void showStatePower(const uint8_t line) {
 #endif
 
 #if GHETTODSP && PWR
-  if ( stateCharging == 1 ) {
-    sprintf(buffer, "Charging: %sV %sC", vTmp, pTmp);
-  } else {
-    sprintf(buffer, "Battery : %sV %sC", vTmp, pTmp);
-  }
+    sprintf(buffer, "%sV %sC ", vTmp, pTmp);
 #endif
 
 #if HOOPTYDSP
-  sprintf(buffer, "Battery : %sV", vTmp);
+  sprintf(buffer, "Battery : %sV  ", vTmp);
 #endif
 
-  lcd.setCursor(0, line);
-  lcdPrintCentered(buffer);
+  lcd.setCursor(8, line);
+  lcd.print(buffer);
 }
 
+#if GHETTODSP
+void showBattery() {
+  if (voltageBattAvg <= battLevel0) { // Flash empty battery icon
+   if ( stateCharging == 0 ) {
+    if (battFlash == 0) {
+      lcd.createChar(4, battChars[0]);
+      battFlash = 1;
+    } else {
+      lcd.createChar(4, blankChar);
+      battFlash = 0;
+    }
+   } else {
+    if ( battAnimate > 5 ) {
+      battAnimate = 0;
+    }
+    lcd.createChar(4, battChars[0+battAnimate]);
+   }
+  } else if (voltageBattAvg <= battLevel20) {
+    if ( battAnimate > 4 ) {
+      battAnimate = 0;
+    }
+    lcd.createChar(4, battChars[1+battAnimate]);
+  } else if (voltageBattAvg <= battLevel40) {
+    if ( battAnimate > 3 ) {
+      battAnimate = 0;
+    }
+    lcd.createChar(4, battChars[2+battAnimate]);
+  } else if (voltageBattAvg <= battLevel60) {
+    if ( battAnimate > 2 ) {
+      battAnimate = 0;
+    }
+    lcd.createChar(4, battChars[3+battAnimate]);
+  } else if (voltageBattAvg <= battLevel80) {
+    if ( battAnimate > 1 ) {
+      battAnimate = 0;
+    }
+    lcd.createChar(4, battChars[4+battAnimate]);
+  } else {
+    battAnimate = 0;
+    lcd.createChar(4, battChars[5]);
+  }
+  lcd.setCursor(5, 0);
+  if (stateCharging == 1) {
+    lcd.print((char)5);
+    battAnimate++;
+  } else {
+    lcd.print(" ");
+    battAnimate=0;
+  }
+  lcd.setCursor(3, 0);
+  if (audioDetected == 1) {
+    lcd.print((char)1);
+  } else {
+    lcd.print(" ");
+  }
+  lcd.setCursor(6, 0);
+  lcd.print((char)4);
+}
+#endif
 
 void showLinks() {
   #if LCD2004
@@ -345,7 +411,7 @@ void showLinks() {
   #endif
   if ( !whichLinkToShow && deviceConnected1  ) {
     lcd.setCursor(0, line);
-    lcd.print(F("Link1:"));
+    lcd.print("Link1:");
     if ( devicePlaying1 == 1 ) {
       lcd.print((char)2);
     } else {
@@ -359,7 +425,7 @@ void showLinks() {
     } else if ( deviceConnected2 ) {
   
       lcd.setCursor(0, line);
-      lcd.print(F("Link2:"));
+      lcd.print("Link2:");
       if ( devicePlaying2 == 1 ) {
         lcd.print((char)2);
       } else {
@@ -379,7 +445,7 @@ void showLinks() {
       //lcd.setCursor(0, 2);
       #if LCD2002
         lcd.setCursor(0, 0);
-        lcdPrintCentered(F("Ready to Pair"));
+        lcdPrintCentered("Ready to Pair");
       #endif
       lcd.setCursor(0, line);
       lcdPrintCentered(speakerName);
@@ -389,8 +455,6 @@ void showLinks() {
   }
   whichLinkToShow = !whichLinkToShow;
 }
-
-
 
 char * lcdGetDb(int8_t val, char * buf) {
   if ( val > 0 ) {
@@ -419,55 +483,54 @@ void showSettings() {
           lcdPrintSetting("D.bass","Low Cut");
           break;
         default:
-          lcdPrintSetting(ftc(F("D.bass")),lcdGetOnOff(settings.dBassMode,buf));
+          lcdPrintSetting("D.bass",lcdGetOnOff(settings.dBassMode,buf));
       }
       break;
     case 2:
-      lcdPrintSetting(ftc(F("Bass")),lcdGetDb(settings.bassLevel,buf));
+      lcdPrintSetting("Bass",lcdGetDb(settings.bassLevel,buf));
       break;
     case 3:
-      lcdPrintSetting(ftc(F("Treble")),lcdGetDb(settings.trebleLevel,buf));
+      lcdPrintSetting("Treble",lcdGetDb(settings.trebleLevel,buf));
       break;
     case 4:
-      lcdPrintSetting(ftc(F("Low Gain")),lcdGetDb(settings.lowLevel,buf));
+      lcdPrintSetting("Low Gain",lcdGetDb(settings.lowLevel,buf));
       break;
     case 5:
-      lcdPrintSetting(ftc(F("Mid Gain")),lcdGetDb(settings.midLevel,buf));
+      lcdPrintSetting("Mid Gain",lcdGetDb(settings.midLevel,buf));
       break;
     case 6:
-      lcdPrintSetting(ftc(F("Hi Gain")),lcdGetDb(settings.highLevel,buf));
-      break;
+      lcdPrintSetting("Hi Gain",lcdGetDb(settings.highLevel,buf));
       break;
     case 7:
-      lcdPrintSetting(ftc(F("Sys Gain")),lcdGetDb(settings.gainLevel,buf));
+      lcdPrintSetting("Sys Gain",lcdGetDb(settings.gainLevel,buf));
       break;
     case 8:
-      lcdPrintSetting(ftc(F("Spk Mode")),lcdGetSpkMode(buf));
+      lcdPrintSetting("Spk Mode",lcdGetSpkMode(buf));
       break;
     case 9:
-      lcdPrintSetting(ftc(F("Source")),lcdGetSourceMode(buf));
+      lcdPrintSetting("Source",lcdGetSourceMode(buf));
       break;
     case 10:
-      lcdPrintSetting(ftc(F("Channel")),lcdGetChannelMode(buf));
+      lcdPrintSetting("Channel",lcdGetChannelMode(buf));
       break;
     #if HOOPTYDSP
       case 11:
-        lcdPrintSetting(ftc(F("Fader")),lcdGetFaderLevel(buf));
+        lcdPrintSetting("Fader",lcdGetFaderLevel(buf));
         break;
       case 12:
-        lcdPrintSetting(ftc(F("Crossover")),lcdGetXoverMode(buf));
+        lcdPrintSetting("Crossover",lcdGetXoverMode(buf));
         break;
       case 13:
-        lcdPrintSetting(ftc(F("Subharmonics")),settings.subharmonicLevel);
+        lcdPrintSetting("Subharmonics",settings.subharmonicLevel);
         break;
       case 14:
-        lcdPrintSetting(ftc(F("Subsonic Filter")),lcdGetOnOff(settings.subsonicMode,buf));
+        lcdPrintSetting("Subsonic Filter",lcdGetOnOff(settings.subsonicMode,buf));
         break;
       case 15:
-        lcdPrintSetting(ftc(F("Call Volume")),lcdGetDb(settings.callVolume,buf));
+        lcdPrintSetting("Call Volume",lcdGetDb(settings.callVolume,buf));
         break;
       case 16:
-        lcdPrintSetting(ftc(F("Mid")),lcdGetDb(settings.midrangeLevel,buf));
+        lcdPrintSetting("Mid",lcdGetDb(settings.midrangeLevel,buf));
         break;
     #endif
   }
@@ -479,16 +542,16 @@ void lcdPrintSpkStatus() {
     char buff[11];
     switch ( NSPK_STATE ) {
       case 0:
-        sprintf(buffer, "%s %s", lcdGetSpkMode(buff), "(No Spk)");
+        sprintf(buffer, "%s %s", lcdGetSpkMode(buff), "No Link");
         break;
       case 2:
-        sprintf(buffer, "%s %s", lcdGetSpkMode(buff), "(Scan)");
+        sprintf(buffer, "%s %s", lcdGetSpkMode(buff), "Scanning");
         break;
       case 3:
-        sprintf(buffer, "%s %s (%d)", lcdGetSpkMode(buff), "Linked", NSPK_GROUP);
+        sprintf(buffer, "%s %s (%d)", lcdGetSpkMode(buff), "Linked", NSPK_GROUP+1);
         break;
       default:
-        sprintf(buffer, "%s %s", lcdGetSpkMode(buff), "(Busy)");
+        sprintf(buffer, "%s %s", lcdGetSpkMode(buff), "Busy");
     }
     lcdPrintCentered(buffer);
   } else {

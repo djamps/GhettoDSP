@@ -233,7 +233,16 @@ void startAudio() {
 
   // Wait for DSP to finish self boot
   // this avoids I2C collisions
-  delay(1000);
+  delay(DSP_WAIT);
+
+  // Audio DSP settings
+  #if DEBUG7
+    Serial.println(F("Configure DSP"));
+  #endif
+  setDspParams();
+  
+  // Unmute external DAC
+  digitalWrite(SOFT_MUTE, HIGH);
 
   // Tell PWR to turn on power to the amp
   #if PWR
@@ -249,14 +258,8 @@ void startAudio() {
     bm64.setUart64();
   #endif
 
-  // Audio DSP settings
-  currentSpkMode = settings.spkMode;
-  #if DEBUG7
-    Serial.println(F("Configure DSP"));
-  #endif
-  setDspParams();
-
   // Set spk/nspk mode
+  currentSpkMode = settings.spkMode;
   #if DEBUG7
     Serial.println(F("Set SPK mode"));
   #endif
@@ -270,20 +273,16 @@ void startAudio() {
   #if DEBUG7
     Serial.println(F("Set AUX mode"));
   #endif
-  #if BT
-    setSourceMode();
-  #endif
+  setSourceMode();
 
   // Show settings
   #if LCD2004 || LCD2002
     #if DEBUG7
       Serial.println(F("Show settings"));
     #endif
+    lcdClearLine(0);
     showSettings();
   #endif
-
-  // Unmute external DAC
-  digitalWrite(SOFT_MUTE, HIGH);
 
   // Turn watchdog timer in PWR module back on
   #if PWR
@@ -299,12 +298,12 @@ void setSourceMode() {
     #if !LINEINBT // Pass line-in ADC's directly through DSP
       switch ( settings.sourceMode ) {
         case 0: // BT In
-          bm64.powerOn(); // Enable bluetooth
+          //bm64.powerOn(); // Enable bluetooth
           dsp.dcSource(MOD_INPUTSELECTL_MONOSWSLEW_ADDR, uint32_t(0));
           dsp.dcSource(MOD_INPUTSELECTR_MONOSWSLEW_ADDR, uint32_t(0));
           break;
         case 1: // Aux In
-          bm64.powerOff(); // Disable bluetooth
+          //bm64.powerOff(); // Disable bluetooth
           dsp.dcSource(MOD_INPUTSELECTL_MONOSWSLEW_ADDR, uint32_t(1));
           dsp.dcSource(MOD_INPUTSELECTR_MONOSWSLEW_ADDR, uint32_t(1));
           break;

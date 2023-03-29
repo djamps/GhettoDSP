@@ -16,7 +16,7 @@
 #include <I2C_Anything.h>
 #endif
 
-#define SW_VERSION "1.21"
+#define SW_VERSION "1.23"
 #define CONFIG_VERSION "1.2" // Must be increased whenever persistant config params are modified
 #define CONFIG_START 32 // Where in EEPROM to store persistant config
 #define PWR_I2C_ADDRESS 0x30 // I2C address of power supply
@@ -30,25 +30,25 @@ uint8_t settingsArray[] = SETTINGS_ARRAY;
 // Settings object structure
 struct SettingsStruct {
   char version[4];
-  // The variables of your settings
+  // The settings
   int8_t
-  lowLevel,
-  midLevel,
-  highLevel,
-  bassLevel,
-  trebleLevel,
-  gainLevel,
-  spkMode,
-  sourceMode,
-  dBassMode,
-  channelMode,
-  powerState,
-  faderLevel,
-  xOverMode,
-  subharmonicLevel,
-  subsonicMode,
-  callVolume,  // in DB
-  midrangeLevel;
+    lowLevel,
+    midLevel,
+    highLevel,
+    bassLevel,
+    trebleLevel,
+    gainLevel,
+    spkMode,
+    sourceMode,
+    dBassMode,
+    channelMode,
+    powerState,
+    faderLevel,
+    xOverMode,
+    subharmonicLevel,
+    subsonicMode,
+    callVolume,  // in DB
+    midrangeLevel;
 } settings = {
   CONFIG_VERSION,
   // The default values
@@ -62,16 +62,20 @@ DSPEEPROM ee(Wire, EEPROM_I2C_ADDRESS, 128); // Set up eeprom
 #if LCD2002 || LCD2004
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
 // Custom chars
+uint8_t battChars[6][8] = {
+  {0x0C,0x1E,0x12,0x12,0x12,0x12,0x12,0x1E}, // 0%
+  {0x0C,0x1E,0x12,0x12,0x12,0x12,0x1E,0x1E}, // 20%
+  {0x0C,0x1E,0x12,0x12,0x12,0x1E,0x1E,0x1E}, // 40%
+  {0x0C,0x1E,0x12,0x12,0x1E,0x1E,0x1E,0x1E}, // 60%
+  {0x0C,0x1E,0x12,0x1E,0x1E,0x1E,0x1E,0x1E}, // 80%
+  {0x0C,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E} // 100%
+};
 uint8_t solidChar[8]   = {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff}; // Solid block
-uint8_t speakerChar[8] = {0x01,0x03,0x05,0x19,0x19,0x05,0x03,0x01}; // Speaker
+uint8_t speakerChar[8] = {0x01,0x03,0x1D,0x11,0x11,0x1D,0x03,0x01}; // Speaker
 uint8_t playChar[8]    = {0x08,0x0C,0x0E,0x0F,0x0E,0x0C,0x08,0x00}; // Play
 uint8_t stopChar[8]    = {0x00,0x00,0x0F,0x0F,0x0F,0x0F,0x00,0x00}; // Stop
-uint8_t batt0[8]       = {0x0C,0x1E,0x12,0x12,0x12,0x12,0x12,0x1E}; // Batt 0%
-uint8_t batt20[8]      = {0x0C,0x1E,0x12,0x12,0x12,0x12,0x1E,0x1E}; // Batt 20%
-uint8_t batt40[8]      = {0x0C,0x1E,0x12,0x12,0x12,0x1E,0x1E,0x1E}; // Batt 40%
-uint8_t batt60[8]      = {0x0C,0x1E,0x12,0x12,0x1E,0x1E,0x1E,0x1E}; // Batt 60%
-uint8_t batt80[8]      = {0x0C,0x1E,0x12,0x1E,0x1E,0x1E,0x1E,0x1E}; // Batt 80%
-uint8_t batt1000[8]      = {0x0C,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E,0x1E}; // Batt 100%
+uint8_t chargeChar[8] = {0x02,0x06,0x0C,0x1F,0x06,0x0C,0x08,0x00}; // Charge indication
+uint8_t blankChar[8]   = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}; // Solid block
 #endif
 
 uint8_t NSPK_CONNECT = 0;
@@ -183,15 +187,20 @@ void setup() {
   #endif
 
   #if LCD2004 || LCD2002
+  
     #if LCD2004
       lcd.begin(20, 4);
     #elif LCD2002
       lcd.begin(20, 2);
     #endif
-    lcd.createChar(0, solidChar); // Sends the custom char to lcd
-    lcd.createChar(1, speakerChar); // Sends the custom char to lcd
-    lcd.createChar(2, playChar); // Sends the custom char to lcd
-    lcd.createChar(3, stopChar); // Sends the custom char to lcd
+    
+    lcd.createChar(0, solidChar);
+    lcd.createChar(1, speakerChar);
+    lcd.createChar(2, playChar);
+    lcd.createChar(3, stopChar);
+    lcd.createChar(4, battChars[0]); // Start with 0%
+    lcd.createChar(5, chargeChar);
+    
   #endif
 
   #if DEBUG
@@ -202,7 +211,7 @@ void setup() {
     //lcd.setBacklight(63);
     lcd.clear();
     char buffer[21];
-    sprintf(buffer, "S/W Version %s", SW_VERSION);
+    sprintf(buffer, "F/W v%s", SW_VERSION);
     lcdPrintCentered(buffer);
   #endif
   
@@ -239,15 +248,15 @@ void setup() {
 
   // ** PROGRAMMER/USBi MODE **
   // Hold encoder down during power-on
-  // to halt CPU for live programming via
-  // USBi/Sigmastudio
+  // to halt CPU for live programming
+  // and tuning via Sigmastudio
   
   // Order of operations:
   // 1. Power on DSP with encoder down
   // 2. Connect programmer to USB
-  // 3. Connect USBi
-  // 4. In sigmastudio: "Link compile download"
-  // 5. Toggle Line In / BT Audio by pressing encoder
+  // 3. Connect programmer to USBi
+  // 4. Toggle Line In / BT Audio by pressing encoder
+  // 5. In sigmastudio: "Link compile download"
   
   #if ENCODER
     char buf[21];
@@ -272,6 +281,7 @@ void setup() {
 
       pinMode(DSP_RESET, INPUT);
       pinMode(DSP_WP, INPUT);
+      digitalWrite(SOFT_MUTE, HIGH);
 
       // Toggle input modes
       while ( buttonState() == true );
@@ -375,6 +385,9 @@ void loop() {
       #if HOOPTYDSP
         readVoltages();
       #endif
+      #if GHETTODSP
+        showBattery();
+      #endif
 
       //if ( settingsMode == 0 { showSettings(); }
       last500mSecTask = millis();
@@ -450,6 +463,11 @@ void loop() {
       #if HOOPTYDSP
         readVoltages();
       #endif
+
+      #if GHETTODSP
+        showBattery();
+      #endif
+      
       last500mSecTask = millis();
     }
   }

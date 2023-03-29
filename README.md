@@ -1,10 +1,12 @@
 # GhettoDSP
  
-GhettoDSP is part of a collection of DIY PCB and MCU codes for creating (or convert passive to) wireless bluetooth speakers.
+GhettoDSP is part of a collection of DIY PCB and MCU codes based around the ADAU1701 DSP chip.
 
-Key components are an Atmega 328p MCU, Microchip BM64 BT module, and ADAU1701 DSP chip.   The BT module can be omitted for standalone 2x4 or 2x8 DSP operation.
+Key components are an Atmega 328p MCU, Microchip BM64 BT module, and ADAU1701 DSP chip.   The BT module can be omitted for minimal/standalone 2x4 or 2x8 DSP operation.
 
-The audio pipeline is I2S (24-bit, 48khz, 64fs).   In BT or aux-in mode, unlimited number of boards can be paired together for wireless stereo or "party" mode.   This is possible through the Wireless Concert (nSPK) feature of the class 1 BM64 module.
+The default audio pipeline is I2S (24-bit, 48khz, 64fs).  Many other combinations are supported through jumpers and DSP config.
+
+In BT or aux-in mode, unlimited number of boards can be paired together for wireless stereo or "party" mode.   This is possible through the Wireless Concert (nSPK) feature of the class 1 BM64 module.
 
 Optional 20x2 or 20x4 I2C LCD module and rotary encoder for DSP and BT settings.
 

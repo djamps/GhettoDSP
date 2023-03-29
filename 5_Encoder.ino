@@ -23,7 +23,7 @@ bool buttonState() {
 void handleEncoder() {
   // If enough time has passed check the rotary encoder
   if ((millis() - lastDebounce) > encoderDebounceDelay) {
-    checkRotary();  // Rotary Encoder check routine below
+    if ( settingMode > 0 ) { checkRotary(); }  // Check for rotation only in a settings mode
 
     lastDebounce = millis(); // Set variable to current millis() timer
 
