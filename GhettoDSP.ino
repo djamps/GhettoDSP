@@ -1,8 +1,8 @@
 #include "config.h"
+#include "SigmaDSP_parameters.h"
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 #include <SigmaDSP.h>
-#include "SigmaDSP_parameters.h"
 #include <EEPROM.h>
 #include <math.h>
 
@@ -21,8 +21,6 @@
 #define CONFIG_START 32 // Where in EEPROM to store persistant config
 #define PWR_I2C_ADDRESS 0x30 // I2C address of power supply
 
-// Set our bluetooth advertisement name
-// Max 20 chars
 char speakerName[21] = SPEAKER_NAME;
 
 uint8_t settingsArray[] = SETTINGS_ARRAY;
@@ -59,8 +57,15 @@ struct SettingsStruct {
 SigmaDSP dsp(Wire, DSP_I2C_ADDRESS, 48000.00f /*,12*/); // Set up DSP at 48khz
 DSPEEPROM ee(Wire, EEPROM_I2C_ADDRESS, 128); // Set up eeprom
 
+#if BT
+  SoftwareSerial swSerial(UART_RX, UART_TX);
+  //AltSoftSerial swSerial(UART_RX, UART_TX);
+  BM64 bm64(swSerial, BT_TX_IND);
+#endif
+
 #if LCD2002 || LCD2004
 LiquidCrystal_I2C lcd(PCF8574_ADDR_A21_A11_A01, 4, 5, 6, 16, 11, 12, 13, 14, POSITIVE);
+
 // Custom chars
 uint8_t battChars[6][8] = {
   {0x0C,0x1E,0x12,0x12,0x12,0x12,0x12,0x1E}, // 0%
@@ -74,8 +79,8 @@ uint8_t solidChar[8]   = {0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff}; // Solid blo
 uint8_t speakerChar[8] = {0x01,0x03,0x1D,0x11,0x11,0x1D,0x03,0x01}; // Speaker
 uint8_t playChar[8]    = {0x08,0x0C,0x0E,0x0F,0x0E,0x0C,0x08,0x00}; // Play
 uint8_t stopChar[8]    = {0x00,0x00,0x0F,0x0F,0x0F,0x0F,0x00,0x00}; // Stop
-uint8_t chargeChar[8] = {0x02,0x06,0x0C,0x1F,0x06,0x0C,0x08,0x00}; // Charge indication
-uint8_t blankChar[8]   = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}; // Solid block
+uint8_t chargeChar[8] = {0x02,0x06,0x0C,0x1F,0x06,0x0C,0x08,0x00}; // Charge
+uint8_t blankChar[8]   = {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}; // Blank block
 #endif
 
 uint8_t NSPK_CONNECT = 0;
@@ -84,6 +89,8 @@ uint8_t NSPK_GROUP = 0;
 
 bool callActive = 0;
 bool callInProgress = 0;
+
+bool bm64PwrState = 0; // Track power state so we don't have multiple power-on sounds
 
 float voltageBatt = 0; // Measured power supply voltage (instantanious)
 int unsigned voltageBattAvgCount = 0; // Related to battery voltage averaging
@@ -101,9 +108,9 @@ uint8_t stateSys = 0; // System/LED status reported from power module
 bool audioDetected = 0; // DSP audio output detect
 
 #if PWR || HOOPTY
-int8_t stateBattery = -1; // Battery state from power module (-1 = unknown)
+int8_t stateBattery = -1; // Battery state from PWR (-1 = unknown)
 #else
-int8_t stateBattery = 2; // Battery state from power module (2 = good)
+int8_t stateBattery = 2; // No PWR, so always good
 #endif
 
 char phoneName1[14]; // Name of BT device on connection 1
@@ -119,26 +126,18 @@ bool devicePlaying1 = 0; // Device is playing on slot 1
 bool devicePlaying2 = 0; // Device is playing on slot 2
 bool needToLinkBack = 0; // Flag to force a reconnect of previous device(s)
 bool whichLinkToShow = 0; // Flag for LCD display alternating between connected devices
+unsigned long lastTimeLinkShown = millis(); // Timer for which device to show
 
 uint8_t settingMode = 0; // Current settings mode (LCD)
-int8_t currentSpkMode; // tracking the Spk mode (for linking with other speakers via BM64 concert mode)
+int8_t currentSpkMode; // tracking the nSpk mode (linking with other speakers)
 
-unsigned long lastSettingChange = 0; // Used for doing occasional eeprom writes
+unsigned long lastSettingChange = 0; // Used for doing limited eeprom writes
 unsigned long last50mSecTask = 0; // 50-mSec task timer
 unsigned long last500mSecTask = 0; // 500-mSec task timer
 unsigned long last1SecTask = 0; // 1-Sec task timer
 unsigned long last5SecTask = 0; // 5-Sec task timer
 
 
-unsigned long lastTimeLinkShown = millis(); // Timer for which device to show
-
-
-// Set up communication with BT module (UART)
-#if BT
-  SoftwareSerial swSerial(UART_RX, UART_TX);
-  //AltSoftSerial swSerial(UART_RX, UART_TX);
-  BM64 bm64(swSerial, BT_TX_IND);
-#endif
 
 void setup() {
   // Load settings/state
@@ -253,8 +252,8 @@ void setup() {
   
   // Order of operations:
   // 1. Power on DSP with encoder down
-  // 2. Connect programmer to USB
-  // 3. Connect programmer to USBi
+  // 2. Connect programmer to PC
+  // 3. Connect programmer to DSP
   // 4. Toggle Line In / BT Audio by pressing encoder
   // 5. In sigmastudio: "Link compile download"
   
@@ -264,12 +263,13 @@ void setup() {
       
       #if PWR
         audioDetected = true;
-        sendDataToPWR();
+        //sendDataToPWR(); // redundant with next line
         disableWatchDog();
       #endif
       
       #if BT
         bm64.powerOn();
+        bm64PwrState = 1;
       #endif
       
       #if LCD2002 || LCD2004
@@ -284,7 +284,7 @@ void setup() {
       digitalWrite(SOFT_MUTE, HIGH);
 
       // Toggle input modes
-      while ( buttonState() == true );
+      while ( buttonState() == true ); // Wait for button-up
       while(1) {
         while ( buttonState() == false );
         while ( buttonState() == true );
@@ -297,8 +297,9 @@ void setup() {
   #endif
 
   #if PWR
-    // Send data to PWR immediately if present
-    sendDataToPWR();
+    // Send and receive data to PWR immediately if present
+    sendDataToPWR(); // Sig detect and voltage comp
+    getDataFromPWR(); // Required to startup reliably
   #endif
 
   // For standalone DSP card, start audio immediately
@@ -334,7 +335,7 @@ void loop() {
 
     // Link back if needed
     #if BT
-      if ( needToLinkBack != 0 ) {
+      if ( needToLinkBack ) {
         bm64.linkBack();
         needToLinkBack = 0;
       }
@@ -385,7 +386,7 @@ void loop() {
       #if HOOPTYDSP
         readVoltages();
       #endif
-      #if GHETTODSP
+      #if GHETTODSP && PWR
         showBattery();
       #endif
 
@@ -464,7 +465,7 @@ void loop() {
         readVoltages();
       #endif
 
-      #if GHETTODSP
+      #if GHETTODSP && PWR
         showBattery();
       #endif
       

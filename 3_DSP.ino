@@ -12,7 +12,7 @@ void dBassModeSet() {
     case 2:
       #if LOWCUT
         dsp.dcSource(MOD_DBASS_MONOSWSLEW_ADDR, uint32_t(0)); // Disable dBass
-        dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, -90); // Cut sub bass
+        dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, -100); // Cut sub bass
       #endif
       break;
   }
@@ -160,11 +160,14 @@ void stopAudio() {
     }
     delay(100);
     bm64.powerOff();
+    bm64PwrState = 0;
   #endif
 }
 
 
 void startAudio() {
+  delay(100); // freeze test
+  
   #if LCD2004
     lcdClearLine(1);
     lcdClearLine(2);
@@ -178,6 +181,7 @@ void startAudio() {
   #if PWR
     // Temporarily disable watchdog timer in PWR module in case we need to program the DSP
     disableWatchDog();
+    delay(100);
   #endif
 
   #if BT // Start the BM64
@@ -193,6 +197,7 @@ void startAudio() {
     setBTName();
     delay(500);
     bm64.powerOn();
+    bm64PwrState = 1;
     delay(500);
   #endif
 
@@ -298,12 +303,16 @@ void setSourceMode() {
     #if !LINEINBT // Pass line-in ADC's directly through DSP
       switch ( settings.sourceMode ) {
         case 0: // BT In
-          //bm64.powerOn(); // Enable bluetooth
+          if ( bm64PwrState == 0 ) {
+            bm64.powerOn(); // Enable bluetooth
+            bm64PwrState = 1;
+          }
           dsp.dcSource(MOD_INPUTSELECTL_MONOSWSLEW_ADDR, uint32_t(0));
           dsp.dcSource(MOD_INPUTSELECTR_MONOSWSLEW_ADDR, uint32_t(0));
           break;
         case 1: // Aux In
-          //bm64.powerOff(); // Disable bluetooth
+          bm64.powerOff(); // Disable bluetooth
+          bm64PwrState = 0;
           dsp.dcSource(MOD_INPUTSELECTL_MONOSWSLEW_ADDR, uint32_t(1));
           dsp.dcSource(MOD_INPUTSELECTR_MONOSWSLEW_ADDR, uint32_t(1));
           break;
@@ -320,9 +329,10 @@ void setSourceMode() {
 
 
 void checkForAudio() {
+  if ( DEBUGX ) {Serial.println(F("Checking audio"));};
   if ( dsp.readBack(MOD_READBACK1_ALG0_VAL0_ADDR, MOD_READBACK1_ALG0_VAL0_VALUES, 3) == 0 ) {
     if ( audioDetected != 1 ) {
-      if ( DEBUG ) {
+      if ( DEBUGX ) {
         Serial.println(F("DSP Detects audio"));
       }
       audioDetected = 1;
@@ -332,7 +342,7 @@ void checkForAudio() {
     }
   } else {
     if ( audioDetected != 0 ) {
-      if ( DEBUG ) {
+      if ( DEBUGX ) {
         Serial.println(F("DSP Detects silence"));
       }
       audioDetected = 0;

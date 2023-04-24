@@ -2,10 +2,11 @@
 
 uint8_t longButtonPush = 0;
 bool aLast;
-unsigned long lastDebounce = 0; // Rotary encoder related
-unsigned long lastButtonPush = 0; // Rotary encoder related
-uint8_t encoderDebounceDelay = 3; // Rotary encoder related
-bool encoderSwLast = HIGH; // Rotary encoder related
+int8_t bValCount = 0;
+unsigned long lastDebounce = 0;
+unsigned long lastButtonPush = 0;
+uint8_t encoderDebounceDelay = 3;
+bool encoderSwLast = HIGH;
 
 void setupEncoder() {
   pinMode(ENCODER_SW, INPUT_PULLUP);
@@ -93,10 +94,20 @@ void checkRotary() {
       Serial.println(F("Rotate"));
     #endif
     if (bVal == LOW) {
-      adjLevel(1); // If bVal is Low, too, CW  ++
+      if ( bValCount < 0 ) { bValCount = 0; };
+      bValCount++;
+      if ( bValCount > 1 ) { // Two rotation "clicks" required per increment
+        adjLevel(1); // If bVal is Low, too, CW  ++
+        bValCount = 0;
+      }
     }
     else {
-      adjLevel(-1); // else, CCW --
+      if ( bValCount > 0 ) { bValCount = 0; };
+      bValCount--;
+      if ( bValCount < -1 ) {
+        adjLevel(-1); // else, CCW --
+        bValCount = 0;
+      }
     }
   }
   aLast = aVal;    //Don't forget to reset aLast

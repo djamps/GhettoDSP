@@ -343,9 +343,14 @@ void showStatePower(const uint8_t line) {
   lcd.print(buffer);
 }
 
-#if GHETTODSP
+#if GHETTODSP && PWR
 void showBattery() {
-  if (voltageBattAvg <= battLevel0) { // Flash empty battery icon
+  // Compensation for charging voltage
+  float comp = 0;
+  if ( stateCharging ) {
+    comp = -0.3; // Voltage diff charging vs not charging
+  }
+  if (voltageBattAvg <= battLevel0-comp) { // Flash empty battery icon
    if ( stateCharging == 0 ) {
     if (battFlash == 0) {
       lcd.createChar(4, battChars[0]);
@@ -360,22 +365,22 @@ void showBattery() {
     }
     lcd.createChar(4, battChars[0+battAnimate]);
    }
-  } else if (voltageBattAvg <= battLevel20) {
+  } else if (voltageBattAvg <= battLevel20-comp) {
     if ( battAnimate > 4 ) {
       battAnimate = 0;
     }
     lcd.createChar(4, battChars[1+battAnimate]);
-  } else if (voltageBattAvg <= battLevel40) {
+  } else if (voltageBattAvg <= battLevel40-comp) {
     if ( battAnimate > 3 ) {
       battAnimate = 0;
     }
     lcd.createChar(4, battChars[2+battAnimate]);
-  } else if (voltageBattAvg <= battLevel60) {
+  } else if (voltageBattAvg <= battLevel60-comp) {
     if ( battAnimate > 2 ) {
       battAnimate = 0;
     }
     lcd.createChar(4, battChars[3+battAnimate]);
-  } else if (voltageBattAvg <= battLevel80) {
+  } else if ((voltageBattAvg <= battLevel80-comp) || stateCharging) { // Exception to keep the battery animated when charging
     if ( battAnimate > 1 ) {
       battAnimate = 0;
     }
@@ -400,6 +405,7 @@ void showBattery() {
   }
   lcd.setCursor(6, 0);
   lcd.print((char)4);
+  lcd.print(" ");
 }
 #endif
 
