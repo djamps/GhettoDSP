@@ -14,11 +14,11 @@ unsigned long lastPeakR;
 
 #if GHETTODSP
 float battLevel0 = 12.7;
-float battLevel20 = 12.9;
+float battLevel20 = 12.8;
 float battLevel40 = 13.0;
 float battLevel60 = 13.1;
 float battLevel80 = 13.2;
-float battLevel100 = 13.5;
+float battLevel100 = 13.3;
 uint8_t battAnimate = 0;
 uint8_t battFlash = 0;
 #endif
@@ -539,6 +539,12 @@ void showSettings() {
         lcdPrintSetting("Mid",lcdGetDb(settings.midrangeLevel,buf));
         break;
     #endif
+    case 17:
+      lcdPrintSetting("Loudness",lcdGetOnOff(settings.loudnessMode,buf));
+      break;
+    case 18:
+      lcdPrintSetting("Corrections",lcdGetOnOff(settings.correctionsMode,buf));
+      break;
   }
 }
 

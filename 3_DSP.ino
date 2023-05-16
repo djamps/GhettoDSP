@@ -69,6 +69,24 @@ void setFader() {
 }
 #endif
 
+void setLoudnessMode(bool enabled) {
+  if ( enabled == true ) {
+    dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL0_ADDR, 0x0091EB85, true);
+    dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL1_ADDR, 0x00C00000, true);
+  } else {
+    dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL0_ADDR, 0x00400000, true);
+    dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL1_ADDR, 0x00400000, true);
+
+  }
+}
+
+void setCorrectionsMode(bool enabled) {
+  if ( enabled == true ) {
+    dsp.dcSource(MOD_FILTERBYPASS_MONOSWSLEW_ADDR, uint32_t(1));
+  } else {
+    dsp.dcSource(MOD_FILTERBYPASS_MONOSWSLEW_ADDR, uint32_t(0));
+  }
+}
 
 void setSysGain() {
   #if GHETTODSP
@@ -118,6 +136,10 @@ void setSubharmonic() {
 #endif
 
 void setDspParams() {
+  // Corrections and loudness
+  setCorrectionsMode(settings.correctionsMode);
+  setLoudnessMode(settings.loudnessMode);
+  
   // Bass and treble
   dsp.dcSource(MOD_BASSADJ_DCINPALG1_ADDR, uint32_t(settings.bassLevel + 10));
   dsp.dcSource(MOD_TREBLEADJ_DCINPALG2_ADDR, uint32_t(settings.trebleLevel + 10));
@@ -227,8 +249,13 @@ void startAudio() {
   #endif
 
   // Set write protect and self boot lines high
+  #if HASEEP
   pinMode(DSP_WP, INPUT);
-  //pinMode(DSP_SELFBOOT, INPUT); // self boot is already pulled high
+  digitalWrite(DSP_SELFBOOT, HIGH);
+  #else
+  //pinMode(DSP_WP, INPUT);
+  digitalWrite(DSP_SELFBOOT, LOW);
+  #endif
 
   // Reset the DSP chip
   pinMode(DSP_RESET, OUTPUT);
@@ -236,9 +263,13 @@ void startAudio() {
   delay(100);
   pinMode(DSP_RESET, INPUT);
 
+  #if HASEEP
   // Wait for DSP to finish self boot
   // this avoids I2C collisions
   delay(DSP_WAIT);
+  #else
+  loadProgram(dsp);
+  #endif
 
   // Audio DSP settings
   #if DEBUG7

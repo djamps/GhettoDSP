@@ -120,6 +120,14 @@ void adjLevel(int8_t change) {
         setDspParams();
         break;
     #endif
+    case 17:
+      adjSetting(settings.loudnessMode,change,0,1);
+      setDspParams();
+      break;
+    case 18:
+      adjSetting(settings.correctionsMode,change,0,1);
+      setDspParams();
+      break;
   }
   #if LCD2002 || LCD2004
     showSettings();

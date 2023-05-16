@@ -2,36 +2,37 @@
 
 // Power settings
 #define BROWNOUTVOLTAGE       11.5 // PWR or hoopty Shutoff if battery voltage is below this
-#define VOLTAGEBATTMAXCHARGE  13.8 // PWR module Stop charging when battery reaches this level
-#define VCOMP                 27.6 // PWR or hoopty ADC calibration
-#define DSP_WAIT              700  // Time (mS) to wait for DSP to selfboot
+#define VOLTAGEBATTMAXCHARGE  14.3 // PWR module Stop charging when battery reaches this level
+#define VCOMP                 28.0 // PWR or hoopty ADC calibration
+#define DSP_WAIT              700 // Time (mS) to wait for DSP to selfboot
 
-#define SPEAKER_NAME "BlasterJ1" // Bluetooth name (20 char max)
+#define SPEAKER_NAME "Blaster9K V2" // Bluetooth name (20 char max)
 //                   "--------------------"
 
-#define DSP_VERSION 1 // Must be increased each time DSP program changed
+#define DSP_VERSION 3 // Must be changed each time DSP program changed
 
 // Hardware settings
 #define LCD2004   true   // 20x4 LCD
 #define LCD2002   false  // 20x2 LCD
 #define BT        true   // BT module
 #define ENCODER   true   // Encoder
-#define PWR       true   // Separate PWR board (GhettoDSP only)
-#define GHETTODSP true   // This is a GhettoDSP board
-#define HOOPTYDSP false  // This is a HooptyDSP board
+#define PWR       true   // Separate PWR board
+#define GHETTODSP true   // GhettoDSP board
+#define HOOPTYDSP false  // HooptyDSP board
+#define HASEEP    true   // External EEPROM for DSP program storage
 
 // Software settings
-#define TWOWAY    true   // 2-way x-over instead of 3-way (GhettoDSP only)
-#define LOWCUT    true   // Include low-cut option in dBass menu (GhettoDSP only)
-#define CUSTOM    false  // Use custom settings array
-#define VUMETER   false  // Show stereo VU meter on home screen
-#define VUREVERSE false  // Reverse VU meter movement
-#define VUSLOW    false  // Slow down VU dropoff
-#define VUPEAK    false  // Peak indication
-#define LINEINDSP false  // Aux in via DSP
-#define LINEINBT  true   // Aux in via BM64 (required for concert mode to work with aux in)
+#define TWOWAY    false   // GhettoDSP - 2-way x-over instead of 3-way
+#define LOWCUT    true   // Include low-cut option in dBass menu
+#define CUSTOM    true  // Use custom settings array
+#define VUMETER   true  // Show stereo VU meter on home screen
+#define VUREVERSE true  // Reverse VU meter movement
+#define VUSLOW    true  // Slow down VU dropoff
+#define VUPEAK    true  // Peak indication
+#define LINEINDSP true  // Line input via DSP
+#define LINEINBT  false   // Line in via BM64
 
-// This section defines which settings are included in the LCD menu and the order
+// This section defines which settings included in LCD menu and which order
 
 // Settings options:
 // 1: dBass Mode
@@ -41,7 +42,7 @@
 // 5: Mid Level (3-way) // Ghetto only
 // 6: High Level (3-way) // Ghetto only
 // 7: System Gain
-// 8: nSpk Mode (concert mode)
+// 8: nSpk Mode
 // 9: Aux in mode
 // 10: Channel mode // Ghetto only
 // 11: Fader // Hoopty only
@@ -50,9 +51,11 @@
 // 14: Subsonic Filter // Hoopty only
 // 15: Call volume // Hoopty only
 // 16: Midrange // Hoopty only
+// 17: Loudness on/off
+// 18: IIR Correction on/off
 
 #if CUSTOM
-  #define SETTINGS_ARRAY {1,2,3} // Custom settings
+  #define SETTINGS_ARRAY {1,17,2,3,9,10,8,7,18} // Custom settings
 #elif HOOPTYDSP
   #define SETTINGS_ARRAY {2,16,3,11,13,9,12,14,8,15,7} // Default Hoopty settings
 #elif GHETTODSP
@@ -72,6 +75,7 @@
 #define DEBUG6  false // BM64 NSPK Status
 #define DEBUG7  false // startAudio()
 #define DEBUG8  false // Temp/misc
+#define DEBUGX  false // Temp/misc
 
 // Pin assignments for ghetto
 #if GHETTODSP
@@ -85,6 +89,7 @@
   #define BT_TX_IND     10 // Output: BM64 UART TX indication
   #define DSP_RESET     A2 // Output: DSP reset line 
   #define DSP_WP        6 // Output: DSP/eeprom write protect
+  #define DSP_SELFBOOT  A3 // Output: DSP/eeprom selfboot
   #define ADC0          A6 // Input: Aux ADC in (temp, tone, ect)
   #define ADC1          A7 // Input: Aux ADC in (temp, tone, ect)
 #endif

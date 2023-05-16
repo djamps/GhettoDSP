@@ -16,8 +16,8 @@
 #include <I2C_Anything.h>
 #endif
 
-#define SW_VERSION "1.23"
-#define CONFIG_VERSION "1.2" // Must be increased whenever persistant config params are modified
+#define SW_VERSION "1.30"
+#define CONFIG_VERSION "1.3" // Must be increased whenever persistant config params are modified
 #define CONFIG_START 32 // Where in EEPROM to store persistant config
 #define PWR_I2C_ADDRESS 0x30 // I2C address of power supply
 
@@ -46,11 +46,13 @@ struct SettingsStruct {
     subharmonicLevel,
     subsonicMode,
     callVolume,  // in DB
-    midrangeLevel;
+    midrangeLevel,
+    loudnessMode,
+    correctionsMode;
 } settings = {
   CONFIG_VERSION,
   // The default values
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -20, 0
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -20, 0, 1, 1
 };
 
 // Init libraries
@@ -177,8 +179,10 @@ void setup() {
   // Halt the DSP
   pinMode(DSP_RESET, OUTPUT);
   pinMode(DSP_WP, OUTPUT);
-  digitalWrite(DSP_WP, LOW);
+  pinMode(DSP_SELFBOOT, OUTPUT);
   digitalWrite(DSP_RESET, LOW);
+  digitalWrite(DSP_WP, LOW);
+  digitalWrite(DSP_SELFBOOT, LOW);
 
   // Start the LCD 20x4
   #if DEBUG
@@ -225,13 +229,16 @@ void setup() {
   #endif
 
   dsp.begin();
+  #if HASEEP
   ee.begin();
+  #endif
 
   #if DEBUG
     Serial.print(F("EEPROM reply: "));
     Serial.println(ee.ping() ? F("Not present") : F("Present"));
   #endif
 
+  #if HASEEP
   if ( ee.ping() ) {
     #if LCD2002 || LCD2004
       lcd.setCursor(0, 1);
@@ -239,6 +246,7 @@ void setup() {
     #endif
     while (1);
   }
+  #endif
 
   // Set up encoder
   #if ENCODER
@@ -268,8 +276,11 @@ void setup() {
       #endif
       
       #if BT
+        setBTName();
+        delay(500);
         bm64.powerOn();
         bm64PwrState = 1;
+        delay(500);
       #endif
       
       #if LCD2002 || LCD2004
@@ -279,10 +290,27 @@ void setup() {
         lcdPrintCentered(lcdGetSourceMode(buf));
       #endif
 
-      pinMode(DSP_RESET, INPUT);
+      pinMode(DSP_RESET, OUTPUT);
+      digitalWrite(DSP_RESET, LOW);
+  
       pinMode(DSP_WP, INPUT);
+      digitalWrite(DSP_SELFBOOT, HIGH);
+      
+      delay(100);
+      pinMode(DSP_RESET, INPUT);
+      delay(DSP_WAIT);
+
       digitalWrite(SOFT_MUTE, HIGH);
 
+      // Disable IIR and loudness contour
+      setSourceMode();
+      setLoudnessMode(false); // Disable loudness contour
+      setCorrectionsMode(false); // Bypass IIR filters
+      
+      // Left channel only mode
+      dsp.volume(MOD_STEREOCOMBINE_ALG0_STAGE0_VOLONE_ADDR, settings.gainLevel + 3);
+      dsp.volume(MOD_STEREOCOMBINE_ALG0_STAGE0_VOLTWO_ADDR, -90);
+      
       // Toggle input modes
       while ( buttonState() == true ); // Wait for button-up
       while(1) {
