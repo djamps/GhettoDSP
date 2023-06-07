@@ -3,13 +3,13 @@
 // Power settings
 #define BROWNOUTVOLTAGE       11.5 // PWR or hoopty Shutoff if battery voltage is below this
 #define VOLTAGEBATTMAXCHARGE  14.3 // PWR module Stop charging when battery reaches this level
-#define VCOMP                 28.0 // PWR or hoopty ADC calibration
+#define VCOMP                 28.0 // PWR or hoopty voltage calibration
 #define DSP_WAIT              700 // Time (mS) to wait for DSP to selfboot
 
-#define SPEAKER_NAME "Blaster9K V2" // Bluetooth name (20 char max)
+#define SPEAKER_NAME "Marantz" // Bluetooth name (20 char max)
 //                   "--------------------"
 
-#define DSP_VERSION 3 // Must be changed each time DSP program changed
+#define DSP_VERSION 1 // Must be changed each time DSP program changed
 
 // Hardware settings
 #define LCD2004   true   // 20x4 LCD
@@ -55,7 +55,7 @@
 // 18: IIR Correction on/off
 
 #if CUSTOM
-  #define SETTINGS_ARRAY {1,17,2,3,9,10,8,7,18} // Custom settings
+  #define SETTINGS_ARRAY {1,17,2,3,9,10,8,7} // Custom settings
 #elif HOOPTYDSP
   #define SETTINGS_ARRAY {2,16,3,11,13,9,12,14,8,15,7} // Default Hoopty settings
 #elif GHETTODSP

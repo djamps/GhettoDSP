@@ -52,7 +52,7 @@ struct SettingsStruct {
 } settings = {
   CONFIG_VERSION,
   // The default values
-  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -20, 0, 1, 1
+  0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, -20, 0, 1, 1
 };
 
 // Init libraries

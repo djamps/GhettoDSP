@@ -348,7 +348,7 @@ void showBattery() {
   // Compensation for charging voltage
   float comp = 0;
   if ( stateCharging ) {
-    comp = -0.3; // Voltage diff charging vs not charging
+    comp = -0.4; // Voltage diff charging vs not charging
   }
   if (voltageBattAvg <= battLevel0-comp) { // Flash empty battery icon
    if ( stateCharging == 0 ) {
