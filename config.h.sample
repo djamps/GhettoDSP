@@ -22,15 +22,15 @@
 #define HASEEP    true   // External EEPROM for DSP program storage
 
 // Software settings
-#define TWOWAY    false   // GhettoDSP - 2-way x-over instead of 3-way
+#define TWOWAY    false  // GhettoDSP - 2-way x-over instead of 3-way
 #define LOWCUT    true   // Include low-cut option in dBass menu
-#define CUSTOM    true  // Use custom settings array
-#define VUMETER   true  // Show stereo VU meter on home screen
-#define VUREVERSE true  // Reverse VU meter movement
-#define VUSLOW    true  // Slow down VU dropoff
-#define VUPEAK    true  // Peak indication
-#define LINEINDSP true  // Line input via DSP
-#define LINEINBT  false   // Line in via BM64
+#define CUSTOM    true   // Use custom settings array
+#define VUMETER   true   // Show stereo VU meter on home screen
+#define VUREVERSE true   // Reverse VU meter movement
+#define VUSLOW    true   // Slow down VU dropoff
+#define VUPEAK    true   // Peak indication
+#define LINEINDSP true   // Line input via DSP
+#define LINEINBT  false  // Line in via BM64
 
 // This section defines which settings included in LCD menu and which order
 
