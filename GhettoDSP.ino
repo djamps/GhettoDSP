@@ -16,8 +16,8 @@
 #include <I2C_Anything.h>
 #endif
 
-#define SW_VERSION "1.30"
-#define CONFIG_VERSION "1.3" // Must be increased whenever persistant config params are modified
+#define SW_VERSION "1.40"
+#define CONFIG_VERSION "1.5" // Must be increased whenever persistant config params are modified
 #define CONFIG_START 32 // Where in EEPROM to store persistant config
 #define PWR_I2C_ADDRESS 0x30 // I2C address of power supply
 
@@ -25,8 +25,7 @@ char speakerName[21] = SPEAKER_NAME;
 
 uint8_t settingsArray[] = SETTINGS_ARRAY;
 
-// Settings object structure
-struct SettingsStruct {
+typedef struct {
   char version[4];
   // The settings
   int8_t
@@ -48,12 +47,18 @@ struct SettingsStruct {
     callVolume,  // in DB
     midrangeLevel,
     loudnessMode,
-    correctionsMode;
-} settings = {
+    correctionsMode,
+    eqMode;
+} Settings;
+
+
+Settings settings {
   CONFIG_VERSION,
   // The default values
-  0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, -20, 0, 1, 1
+  0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, -20, 0, 1, 1, 6
 };
+
+Settings eq;
 
 // Init libraries
 SigmaDSP dsp(Wire, DSP_I2C_ADDRESS, 48000.00f /*,12*/); // Set up DSP at 48khz
@@ -142,9 +147,6 @@ unsigned long last5SecTask = 0; // 5-Sec task timer
 
 
 void setup() {
-  // Load settings/state
-  readEEPROM();
-
   // Start USB serial and UART
   Serial.begin(115200);
 
@@ -155,6 +157,9 @@ void setup() {
   #if DEBUG || DEBUG2 || DEBUG3 || DEBUG4 || DEBUG5 || DEBUG6 || DEBUG7
     Serial.println(F("*****************************"));
   #endif
+
+  // Load settings/state
+  readEEPROM();
 
   #if HOOPTYDSP
     // Set up remote output and acc/key sense

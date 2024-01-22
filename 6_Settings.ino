@@ -12,6 +12,10 @@ void readEEPROM() {
       Serial.println(F("EEPROM Load failed"));
     }
   }
+    #if DEBUG4
+      Serial.print(F("Read eep: "));
+      Serial.println(settings.eqMode);
+    #endif
 }
 
 void writeEEPROM() {
@@ -20,27 +24,72 @@ void writeEEPROM() {
   }
   for (unsigned int t = 0; t < sizeof(settings); t++)
     EEPROM.write(CONFIG_START + t, *((char*)&settings + t));
+
+    #if DEBUG4
+      Serial.print(F("Wrote eep: "));
+      Serial.println(settings.eqMode);
+    #endif
+}
+
+bool valueInArray(uint8_t val, uint8_t *arr, size_t n) {
+    for(size_t i = 0; i < n; i++) {
+        if(arr[i] == val) {
+            #if DEBUG4
+             Serial.print(F("Skipped: "));
+             Serial.println(arr[i]);
+            #endif
+            return true;
+        }
+    }
+    #if DEBUG4
+      Serial.print(F("Allowed: "));
+      Serial.println(val);
+    #endif
+    return false;
 }
 
 // Advance settings mode +1
 void advSettingMode() {
+
+  #if DEBUG4
+   Serial.println(F("Adv setting"));
+  #endif
+      
+  uint8_t disabledSettingsArray[] = DISABLED_SETTINGS_IN_EQ_MODE;
+  bool gotSetting = false;
+  
   if ( settingMode == 0 ) {
     settingMode = settingsArray[0];
     return;
   }
+  
   // Find current setting mode in array and advance one
-  uint8_t nSize = sizeof(settingsArray) / sizeof(settingsArray[0]);
-  for (uint8_t i = 0; i < nSize; i++) {
-    if (settingMode == settingsArray[i]) {
-      if ( i == nSize ) {
-        settingMode = settingsArray[0];
-        return;
-      } else {
+  uint8_t nSize = sizeof(settingsArray);
+  uint8_t i = 0;
+  while( i < nSize ) {
+    
+    // Did we reach the current setting?
+    if ( settingMode == settingsArray[i] ) {
+      gotSetting = true;
+    }
+    if (gotSetting) {
+      // Skip certain DSP settings in a fixed EQ mode
+      if ( settings.eqMode == 7 || (settings.eqMode < 7 && !valueInArray(settingsArray[i+1], disabledSettingsArray, sizeof(disabledSettingsArray)))) {
+        #if DEBUG4
+          Serial.print(F("Next: "));
+          Serial.println(settingsArray[i + 1]);
+        #endif
         settingMode = settingsArray[i + 1];
         return;
       }
+      #if DEBUG4
+        Serial.print(F("Failed1 "));
+        Serial.println(settingsArray[i + 1]);
+      #endif
     }
+    i++;
   }
+  Serial.println(F("Failed2"));
 }
 
 void adjLevel(int8_t change) {
@@ -54,7 +103,7 @@ void adjLevel(int8_t change) {
       #endif
       adjSetting(settings.dBassMode,change, 0, dBassModeMax);
       #if GHETTODSP
-        dBassModeSet();
+        setDbassMode(settings.dBassMode);
       #endif
       break;
     case 2:
@@ -126,6 +175,10 @@ void adjLevel(int8_t change) {
       break;
     case 18:
       adjSetting(settings.correctionsMode,change,0,1);
+      setDspParams();
+      break;
+    case 19:
+      adjSetting(settings.eqMode,change,0,7);
       setDspParams();
       break;
   }

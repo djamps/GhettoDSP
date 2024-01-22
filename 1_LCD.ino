@@ -545,6 +545,9 @@ void showSettings() {
     case 18:
       lcdPrintSetting("Corrections",lcdGetOnOff(settings.correctionsMode,buf));
       break;
+    case 19:
+      lcdPrintSetting("EQ Mode",lcdGetEqMode(buf));
+      break;
   }
 }
 
@@ -627,6 +630,36 @@ char * lcdGetChannelMode(char * buf) {
       break;
     case 2:
       strcpy(buf,"Right");
+      break;
+  }
+  return buf;
+}
+
+char * lcdGetEqMode(char * buf) {
+  switch ( settings.eqMode ) {
+    case 0:
+      strcpy(buf,"Defeat");
+      break;
+    case 1:
+      strcpy(buf,"Natural");
+      break;
+    case 2:
+      strcpy(buf,"Bright");
+      break;
+    case 3:
+      strcpy(buf,"Deep");
+      break;
+    case 4:
+      strcpy(buf,"Punch");
+      break;
+    case 5:
+      strcpy(buf,"Power");
+      break;
+    case 6:
+      strcpy(buf,"Night");
+      break;
+    case 7:
+      strcpy(buf,"Custom");
       break;
   }
   return buf;

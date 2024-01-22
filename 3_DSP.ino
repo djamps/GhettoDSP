@@ -1,6 +1,6 @@
 #if GHETTODSP
-void dBassModeSet() {
-  switch ( settings.dBassMode ) {
+void setDbassMode(uint8_t mode) {
+  switch ( mode ) {
     case 0:
       dsp.dcSource(MOD_DBASS_MONOSWSLEW_ADDR, uint32_t(0)); // Disable dBass
       dsp.volume(MOD_SUBLOWMIX_ALG0_STAGE0_VOLONE_ADDR, 0); // Restore sub bass
@@ -71,8 +71,8 @@ void setFader() {
 
 void setLoudnessMode(bool enabled) {
   if ( enabled == true ) {
-    dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL0_ADDR, 0x0091EB85, true);
-    dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL1_ADDR, 0x00C00000, true);
+    dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL0_ADDR, 0x00E8F5C3, true);
+    dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL1_ADDR, 0x00E8F5C3, true);
   } else {
     dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL0_ADDR, 0x00400000, true);
     dsp.safeload_writeRegister(MOD_LOUDNESSLHEXT1_ALG0_LEVEL1_ADDR, 0x00400000, true);
@@ -135,28 +135,125 @@ void setSubharmonic() {
 }
 #endif
 
+void setEqMode() {
+  memcpy(&eq, &settings, sizeof(Settings));
+  switch(settings.eqMode) {
+    case 0: // Defeat all DSP
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 0;
+      eq.bassLevel = 0;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 0;
+      eq.dBassMode = 0;
+      eq.lowLevel = 0;
+      eq.midLevel = 0;
+      eq.highLevel = 0;
+      break;
+    case 1: // Natural - only IIR corrections
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 1;
+      eq.bassLevel = 0;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 0;
+      eq.dBassMode = 0;
+      eq.lowLevel = 0;
+      eq.midLevel = 0;
+      eq.highLevel = 0;
+      break;
+    case 2: // Bright
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 1;
+      eq.bassLevel = 0;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 6;
+      eq.dBassMode = 0;
+      eq.lowLevel = 0;
+      eq.midLevel = 0;
+      eq.highLevel = 0;
+      break;
+    case 3: // Deep
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 1;
+      eq.bassLevel = 6;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 3;
+      eq.dBassMode = 0;
+      eq.lowLevel = 0;
+      eq.midLevel = 0;
+      eq.highLevel = 0;
+      break;
+    case 4: // Punch
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 1;
+      eq.bassLevel = 2;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 3;
+      eq.dBassMode = 1;
+      eq.lowLevel = 0;
+      eq.midLevel = 0;
+      eq.highLevel = 0;
+      break;
+    case 5: // Power
+      eq.loudnessMode = 1;
+      eq.correctionsMode = 1;
+      eq.bassLevel = 6;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 9;
+      eq.dBassMode = 1;
+      eq.lowLevel = 0;
+      eq.midLevel = 0;
+      eq.highLevel = 0;
+      break;
+    case 6: // Night
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 1;
+      eq.bassLevel = 0;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 0;
+      eq.dBassMode = 2;
+      eq.lowLevel = 0;
+      eq.midLevel = 0;
+      eq.highLevel = 0;
+      break;
+    case 7: // Custom
+      break;
+  }
+}
+
 void setDspParams() {
+  Settings tmp;
+
+  #if EQ
+    setEqMode();
+  #endif
+  
+  if ( settings.eqMode == 7 ) {
+    memcpy(&tmp, &settings, sizeof(Settings));
+  } else {
+    memcpy(&tmp, &eq, sizeof(Settings));
+  }
+  
   // Corrections and loudness
-  setCorrectionsMode(settings.correctionsMode);
-  setLoudnessMode(settings.loudnessMode);
+  setCorrectionsMode(tmp.correctionsMode);
+  setLoudnessMode(tmp.loudnessMode);
   
   // Bass and treble
-  dsp.dcSource(MOD_BASSADJ_DCINPALG1_ADDR, uint32_t(settings.bassLevel + 10));
-  dsp.dcSource(MOD_TREBLEADJ_DCINPALG2_ADDR, uint32_t(settings.trebleLevel + 10));
+  dsp.dcSource(MOD_BASSADJ_DCINPALG1_ADDR, uint32_t(tmp.bassLevel + 10));
+  dsp.dcSource(MOD_TREBLEADJ_DCINPALG2_ADDR, uint32_t(tmp.trebleLevel + 10));
   
   #if HOOPTYDSP
-    dsp.dcSource(MOD_MIDADJ_DCINPALG5_ADDR, uint32_t(settings.midrangeLevel + 10));
+    dsp.dcSource(MOD_MIDADJ_DCINPALG5_ADDR, uint32_t(tmp.midrangeLevel + 10));
   #endif
   
   setSysGain();
 
   #if GHETTODSP
-    dBassModeSet();
-    dsp.volume(MOD_LOWLEVEL_GAIN1940ALGNS1_ADDR, settings.lowLevel);
+    setDbassMode(tmp.dBassMode);
+    dsp.volume(MOD_LOWLEVEL_GAIN1940ALGNS1_ADDR, tmp.lowLevel);
     #if !TWOWAY
-      dsp.volume(MOD_MIDLEVEL_GAIN1940ALGNS2_ADDR, settings.midLevel);
+      dsp.volume(MOD_MIDLEVEL_GAIN1940ALGNS2_ADDR, tmp.midLevel);
     #endif
-    dsp.volume(MOD_HIGHLEVEL_GAIN1940ALGNS3_ADDR, settings.highLevel);
+    dsp.volume(MOD_HIGHLEVEL_GAIN1940ALGNS3_ADDR, tmp.highLevel);
   #endif
 
   #if HOOPTYDSP
