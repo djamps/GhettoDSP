@@ -149,7 +149,7 @@ void setEqMode() {
       eq.midLevel = 0;
       eq.highLevel = 0;
       break;
-    case 1: // Natural - only IIR corrections
+    case 1: // Accuracy - only IIR corrections
       eq.loudnessMode = 0;
       eq.correctionsMode = 1;
       eq.bassLevel = 0;
@@ -165,7 +165,7 @@ void setEqMode() {
       eq.correctionsMode = 1;
       eq.bassLevel = 0;
       eq.midrangeLevel = 0;
-      eq.trebleLevel = 6;
+      eq.trebleLevel = 8;
       eq.dBassMode = 0;
       eq.lowLevel = 0;
       eq.midLevel = 0;
@@ -185,7 +185,7 @@ void setEqMode() {
     case 4: // Punch
       eq.loudnessMode = 0;
       eq.correctionsMode = 1;
-      eq.bassLevel = 2;
+      eq.bassLevel = 6;
       eq.midrangeLevel = 0;
       eq.trebleLevel = 3;
       eq.dBassMode = 1;
@@ -195,10 +195,10 @@ void setEqMode() {
       break;
     case 5: // Power
       eq.loudnessMode = 1;
-      eq.correctionsMode = 1;
+      eq.correctionsMode = 0;
       eq.bassLevel = 6;
       eq.midrangeLevel = 0;
-      eq.trebleLevel = 9;
+      eq.trebleLevel = 10;
       eq.dBassMode = 1;
       eq.lowLevel = 0;
       eq.midLevel = 0;
