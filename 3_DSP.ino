@@ -304,7 +304,7 @@ void startAudio() {
   #endif
 
   #if BT // Start the BM64
-    #if DEBUG7
+    #if DEBUG
       Serial.println(F("Start BM64"));
     #endif
 
@@ -325,19 +325,19 @@ void startAudio() {
     lcdPrintCentered(F("Updating DSP"));
   #endif
 
-  #if DEBUG7
-    Serial.println(F("Starting EEPROM update"));
+  #if DEBUG
+    Serial.println(F("Start EEPROM update"));
   #endif
 
   ee.writeFirmware(DSP_eeprom_firmware, sizeof(DSP_eeprom_firmware), DSP_VERSION);
 
-  #if DEBUG7
-    Serial.println(F("Finished EEPROM update"));
+  #if DEBUG
+    Serial.println(F("End EEPROM update"));
   #endif
 
   // Start the DSP
-  #if DEBUG7
-    Serial.println(F("Loading DSP"));
+  #if DEBUG
+    Serial.println(F("Boot DSP"));
   #endif
 
   #if LCD2004 || LCD2002
@@ -369,7 +369,7 @@ void startAudio() {
   #endif
 
   // Audio DSP settings
-  #if DEBUG7
+  #if DEBUG
     Serial.println(F("Configure DSP"));
   #endif
   setDspParams();
@@ -385,9 +385,6 @@ void startAudio() {
 
   // Tell the BM64 we have a shitty 64 byte buffer
   #if BT
-    #if DEBUG
-      Serial.println(F("BM64 UART"));
-    #endif
     bm64.setUart64();
   #endif
 
