@@ -219,12 +219,6 @@ void setup() {
 
   #endif
 
-
-
-
-
-
-  
   // Set BT event callback
   #if BT
     bm64.setCallback(onEventCallback);
@@ -233,6 +227,7 @@ void setup() {
   // and Init sigmadsp control
   
   dsp.begin();
+  
   #if HASEEP
     ee.begin();
   #endif
@@ -416,7 +411,7 @@ void loop() {
       #if HOOPTYDSP
         readVoltages();
       #endif
-      #if GHETTODSP && PWR
+      #if GHETTODSP && PWR && (LCD2002 || LCD2004)
         showBattery();
       #endif
 
@@ -495,7 +490,7 @@ void loop() {
         readVoltages();
       #endif
 
-      #if GHETTODSP && PWR
+      #if GHETTODSP && PWR && (LCD2002 || LCD2004)
         showBattery();
       #endif
       
