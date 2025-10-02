@@ -318,7 +318,9 @@ void onEventCallback(BM64_event_t *event) {
       phoneName1[i] = ' ';
     }
     deviceConnected1 = 0;
-    showLinks();
+    #if LCD2004 || LCD2002
+      showLinks();
+    #endif
   }
 
   // Link disconnect link 2
@@ -327,7 +329,9 @@ void onEventCallback(BM64_event_t *event) {
       phoneName2[i] = ' ';
     }
     deviceConnected2 = 0;
-    showLinks();
+    #if LCD2004 || LCD2002
+      showLinks();
+    #endif
   }
 
   // Link connect
@@ -340,10 +344,14 @@ void onEventCallback(BM64_event_t *event) {
     if (  event->parameter[12] == 1 ) {
       devicePlaying1 = 1;
       getMetaData();
-      showLinks();
+      #if LCD2004 || LCD2002
+        showLinks();
+      #endif
     } else {
       devicePlaying1 = 0;
-      showLinks();
+      #if LCD2004 || LCD2002
+        showLinks();
+      #endif
       if ( devicePlaying2 == 0) {
         metaDataSong[0] = null;
         metaDataArtist[0] = null;

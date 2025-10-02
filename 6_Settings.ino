@@ -9,8 +9,9 @@ void readEEPROM() {
     }
   } else {
     if ( DEBUG ) {
-      Serial.println(F("EEPROM Load failed"));
+      Serial.println(F("EEPROM Load failed, needs init"));
     }
+    writeEEPROM();
   }
     #if DEBUG4
       Serial.print(F("Read eep: "));

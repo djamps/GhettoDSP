@@ -16,7 +16,7 @@
 #include <I2C_Anything.h>
 #endif
 
-#define SW_VERSION "1.40"
+#define SW_VERSION "1.41"
 #define CONFIG_VERSION "1.5" // Must be increased whenever persistant config params are modified
 #define CONFIG_START 32 // Where in EEPROM to store persistant config
 #define PWR_I2C_ADDRESS 0x30 // I2C address of power supply
@@ -190,12 +190,11 @@ void setup() {
   digitalWrite(DSP_SELFBOOT, LOW);
 
   // Start the LCD 20x4
-  #if DEBUG
-    Serial.println(F("Starting LCD"));
-  #endif
 
   #if LCD2004 || LCD2002
-  
+    #if DEBUG
+      Serial.println(F("Starting LCD"));
+    #endif
     #if LCD2004
       lcd.begin(20, 4);
     #elif LCD2002
@@ -208,43 +207,36 @@ void setup() {
     lcd.createChar(3, stopChar);
     lcd.createChar(4, battChars[0]); // Start with 0%
     lcd.createChar(5, chargeChar);
-    
-  #endif
 
-  #if DEBUG
-    Serial.println(F("Clearing LCD"));
-  #endif
+    #if DEBUG
+      Serial.println(F("Clearing LCD"));
+    #endif
 
-  #if LCD2002 || LCD2004
-    //lcd.setBacklight(63);
     lcd.clear();
     char buffer[21];
     sprintf(buffer, "F/W v%s", SW_VERSION);
     lcdPrintCentered(buffer);
+
   #endif
-  
+
   // Set BT event callback
   #if BT
     bm64.setCallback(onEventCallback);
   #endif
   
   // and Init sigmadsp control
-  #if DEBUG
-    Serial.println(F("Init DSP libs"));
-  #endif
-
+  
   dsp.begin();
+  
   #if HASEEP
-  ee.begin();
-  #endif
-
-  #if DEBUG
-    Serial.print(F("EEPROM reply: "));
-    Serial.println(ee.ping() ? F("Not present") : F("Present"));
+    ee.begin();
   #endif
 
   #if HASEEP
   if ( ee.ping() ) {
+    #if DEBUG
+      Serial.println(F("EEPROM not found"));
+    #endif
     #if LCD2002 || LCD2004
       lcd.setCursor(0, 1);
       lcdPrintCentered(F("No EEPROM found!"));
@@ -419,7 +411,7 @@ void loop() {
       #if HOOPTYDSP
         readVoltages();
       #endif
-      #if GHETTODSP && PWR
+      #if GHETTODSP && PWR && (LCD2002 || LCD2004)
         showBattery();
       #endif
 
@@ -498,7 +490,7 @@ void loop() {
         readVoltages();
       #endif
 
-      #if GHETTODSP && PWR
+      #if GHETTODSP && PWR && (LCD2002 || LCD2004)
         showBattery();
       #endif
       

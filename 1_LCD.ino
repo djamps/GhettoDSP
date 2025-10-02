@@ -638,7 +638,7 @@ char * lcdGetChannelMode(char * buf) {
 char * lcdGetEqMode(char * buf) {
   switch ( settings.eqMode ) {
     case 0:
-      strcpy(buf,"Defeat");
+      strcpy(buf,"Off/Bypass");
       break;
     case 1:
       strcpy(buf,"Accuracy");
