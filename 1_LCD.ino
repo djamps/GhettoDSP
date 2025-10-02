@@ -641,7 +641,7 @@ char * lcdGetEqMode(char * buf) {
       strcpy(buf,"Defeat");
       break;
     case 1:
-      strcpy(buf,"Natural");
+      strcpy(buf,"Accuracy");
       break;
     case 2:
       strcpy(buf,"Bright");
