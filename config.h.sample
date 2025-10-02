@@ -2,35 +2,36 @@
 
 // Power settings
 #define BROWNOUTVOLTAGE       11.5 // PWR or hoopty Shutoff if battery voltage is below this
-#define VOLTAGEBATTMAXCHARGE  14.3 // PWR module Stop charging when battery reaches this level
-#define VCOMP                 28.0 // PWR or hoopty voltage calibration
+#define VOLTAGEBATTMAXCHARGE  14.0 // PWR module Stop charging when battery reaches this level
+#define VCOMP                 28.5 // PWR or hoopty ADC calibration
 #define DSP_WAIT              700 // Time (mS) to wait for DSP to selfboot
 
-#define SPEAKER_NAME "Marantz" // Bluetooth name (20 char max)
+#define SPEAKER_NAME "Blaster9K Gen2" // Bluetooth name (20 char max)
 //                   "--------------------"
 
 #define DSP_VERSION 1 // Must be changed each time DSP program changed
 
 // Hardware settings
-#define LCD2004   true   // 20x4 LCD
+#define LCD2004   false   // 20x4 LCD
 #define LCD2002   false  // 20x2 LCD
 #define BT        true   // BT module
-#define ENCODER   true   // Encoder
-#define PWR       true   // Separate PWR board
+#define ENCODER   false   // Encoder
+#define PWR       false   // Separate PWR board
 #define GHETTODSP true   // GhettoDSP board
 #define HOOPTYDSP false  // HooptyDSP board
 #define HASEEP    true   // External EEPROM for DSP program storage
 
 // Software settings
-#define TWOWAY    false  // GhettoDSP - 2-way x-over instead of 3-way
+#define TWOWAY    false   // GhettoDSP - 2-way x-over instead of 3-way
 #define LOWCUT    true   // Include low-cut option in dBass menu
-#define CUSTOM    true   // Use custom settings array
-#define VUMETER   true   // Show stereo VU meter on home screen
-#define VUREVERSE true   // Reverse VU meter movement
-#define VUSLOW    true   // Slow down VU dropoff
-#define VUPEAK    true   // Peak indication
-#define LINEINDSP true   // Line input via DSP
-#define LINEINBT  false  // Line in via BM64
+#define CUSTOM    true  // Use custom settings array
+#define VUMETER   false  // Show stereo VU meter on home screen
+#define VUREVERSE true  // Reverse VU meter movement
+#define VUSLOW    true  // Slow down VU dropoff
+#define VUPEAK    true  // Peak indication
+#define LINEINDSP true  // Line input via DSP
+#define LINEINBT  false   // Line in via BM64
+#define EQ        true   // EQ options menu functions
 
 // This section defines which settings included in LCD menu and which order
 
@@ -53,9 +54,13 @@
 // 16: Midrange // Hoopty only
 // 17: Loudness on/off
 // 18: IIR Correction on/off
+// 19: EQ Mode (requires EQ is true in software settings)
+
+// These settings are skipped when EQ mode in a fixed EQ setting
+#define DISABLED_SETTINGS_IN_EQ_MODE {1,2,3,4,5,6,16,17,18}
 
 #if CUSTOM
-  #define SETTINGS_ARRAY {1,17,2,3,9,10,8,7} // Custom settings
+  #define SETTINGS_ARRAY {19,1,17,18,2,3,9,10,8} // Custom settings
 #elif HOOPTYDSP
   #define SETTINGS_ARRAY {2,16,3,11,13,9,12,14,8,15,7} // Default Hoopty settings
 #elif GHETTODSP
@@ -67,15 +72,17 @@
 #endif
 
 // Debugging
-#define DEBUG   false // Startup
+#define DEBUG   true // Startup
 #define DEBUG2  false // Hoopty
 #define DEBUG3  false // PWR/I2C
 #define DEBUG4  false // Encoder
-#define DEBUG5  false // BM64 All Events
+#define DEBUG5  true // BM64 All Events
 #define DEBUG6  false // BM64 NSPK Status
-#define DEBUG7  false // startAudio()
+#define DEBUG7  true // startAudio()
 #define DEBUG8  false // Temp/misc
 #define DEBUGX  false // Temp/misc
+
+#define DEFAULT_SRC_MODE 0 // When no display present
 
 // Pin assignments for ghetto
 #if GHETTODSP

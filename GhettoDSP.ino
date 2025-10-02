@@ -161,6 +161,15 @@ void setup() {
   // Load settings/state
   readEEPROM();
 
+  // With no display there's currently no way to change source mode, so default to BT
+  #if !LCD2002 && !LCD2004
+    if ( settings.sourceMode != 0 ) {
+      Serial.println(F("Default src mode to BT"));
+      settings.sourceMode = DEFAULT_SRC_MODE; // No way to configure this without
+      writeEEPROM();
+    }
+  #endif
+
   #if HOOPTYDSP
     // Set up remote output and acc/key sense
     digitalWrite(REMOTE, LOW);
