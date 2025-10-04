@@ -661,6 +661,15 @@ char * lcdGetEqMode(char * buf) {
     case 7:
       strcpy(buf,"Custom");
       break;
+    case 8:
+      strcpy(buf,"Low Only");
+      break;
+    case 9:
+      strcpy(buf,"Mid Only");
+      break;
+    case 10:
+      strcpy(buf,"High Only");
+      break;
   }
   return buf;
 }

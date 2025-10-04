@@ -179,7 +179,11 @@ void adjLevel(int8_t change) {
       setDspParams();
       break;
     case 19:
+#if TUNING_MODE
+      adjSetting(settings.eqMode,change,0,10);
+#else
       adjSetting(settings.eqMode,change,0,7);
+#endif
       setDspParams();
       break;
   }

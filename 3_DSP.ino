@@ -217,6 +217,39 @@ void setEqMode() {
       break;
     case 7: // Custom
       break;
+    case 8: // Low only
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 0;
+      eq.bassLevel = 0;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 0;
+      eq.dBassMode = 0;
+      eq.lowLevel = 0;
+      eq.midLevel = -90;
+      eq.highLevel = -90;
+      break;
+    case 9: // Mid only
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 0;
+      eq.bassLevel = 0;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 0;
+      eq.dBassMode = 0;
+      eq.lowLevel = -90;
+      eq.midLevel = 0;
+      eq.highLevel = -90;
+      break;
+    case 10: // High only
+      eq.loudnessMode = 0;
+      eq.correctionsMode = 0;
+      eq.bassLevel = 0;
+      eq.midrangeLevel = 0;
+      eq.trebleLevel = 0;
+      eq.dBassMode = 0;
+      eq.lowLevel = -90;
+      eq.midLevel = -90;
+      eq.highLevel = 0;
+      break;
   }
 }
 
