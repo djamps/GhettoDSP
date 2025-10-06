@@ -44,9 +44,6 @@ void getDataFromPWR() {
 
   if ( Wire.available() ) {
     I2C_readAnything(voltageBattAvg);
-    //I2C_readAnything(voltageBuck);
-    //I2C_readAnything(voltageBoost);
-    //I2C_readAnything(voltageCharge);
     I2C_readAnything(tempC);
     I2C_readAnything(statePower);
     I2C_readAnything(stateCharging);

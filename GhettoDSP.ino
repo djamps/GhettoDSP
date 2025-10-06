@@ -16,7 +16,7 @@
 #include <I2C_Anything.h>
 #endif
 
-#define SW_VERSION "1.41"
+#define SW_VERSION "1.43"
 #define CONFIG_VERSION "1.5" // Must be increased whenever persistant config params are modified
 #define CONFIG_START 32 // Where in EEPROM to store persistant config
 #define PWR_I2C_ADDRESS 0x30 // I2C address of power supply
@@ -333,7 +333,7 @@ void setup() {
   #if PWR
     // Send and receive data to PWR immediately if present
     sendDataToPWR(); // Sig detect and voltage comp
-    getDataFromPWR(); // Required to startup reliably
+    getDataFromPWR(); // Required to startup reliably (?)
   #endif
 
   // For standalone DSP card, start audio immediately
@@ -462,6 +462,10 @@ void loop() {
       #if LCD2004 && ( (GHETTODSP && PWR) || HOOPTYDSP )
         showStatePower(0); // show on line 0
       #endif
+      // Avoid watchdog timeouts
+      #if PWR
+        sendDataToPWR();
+      #endif
       last5SecTask = millis();
     }
 
@@ -485,6 +489,10 @@ void loop() {
     if ( millis() > 5000 && millis() - 5000 >= last5SecTask  ) {
       #if LCD2002 || LCD2004
         showStatePower(0); // show on line 0
+      #endif
+      // Avoid watchdog timeouts
+      #if PWR
+        sendDataToPWR();
       #endif
       last5SecTask = millis();
     }
