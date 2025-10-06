@@ -62,7 +62,9 @@ Settings eq;
 
 // Init libraries
 SigmaDSP dsp(Wire, DSP_I2C_ADDRESS, 48000.00f /*,12*/); // Set up DSP at 48khz
+#if HASEEP
 DSPEEPROM ee(Wire, EEPROM_I2C_ADDRESS, 128); // Set up eeprom
+#endif
 
 #if BT
   SoftwareSerial swSerial(UART_RX, UART_TX);
@@ -234,7 +236,7 @@ void setup() {
   #endif
   
   // and Init sigmadsp control
-  
+  Wire.begin();
   dsp.begin();
   
   #if HASEEP

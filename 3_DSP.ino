@@ -358,6 +358,7 @@ void startAudio() {
     lcdPrintCentered(F("Updating DSP"));
   #endif
 
+#if HASEEP
   #if DEBUG7
     Serial.println(F("Starting EEPROM update"));
   #endif
@@ -367,6 +368,8 @@ void startAudio() {
   #if DEBUG7
     Serial.println(F("Finished EEPROM update"));
   #endif
+
+#endif
 
   // Start the DSP
   #if DEBUG7
@@ -393,11 +396,11 @@ void startAudio() {
   delay(100);
   pinMode(DSP_RESET, INPUT);
 
-  #if HASEEP
-  // Wait for DSP to finish self boot
+  // Wait for DSP to finish reset
   // this avoids I2C collisions
   delay(DSP_WAIT);
-  #else
+  
+  #if !HASEEP
   loadProgram(dsp);
   #endif
 
